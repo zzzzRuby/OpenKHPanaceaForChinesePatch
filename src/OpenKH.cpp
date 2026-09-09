@@ -110,9 +110,6 @@ void QuickBootHook()
     LaunchGame(QuickLaunch);
     ExitProcess(QuickLaunch);
 }
-extern "C" {
-int kh1_cn_Apply(HMODULE module);
-}
 
 OpenKH::GameId OpenKH::m_GameID = OpenKH::GameId::Unknown;
 std::wstring OpenKH::m_ModPath = L"./mod";
@@ -122,8 +119,16 @@ bool OpenKH::m_ShowConsole = false;
 bool OpenKH::m_DebugLog = false;
 bool OpenKH::m_EnableCache = true;
 bool OpenKH::m_SoundDebug = false;
-bool OpenKH::m_EnableKH1FontPatch = true;
 bool QuickMenu = false;
+
+#ifdef PANACEA_WITH_DYNAMIC_INJECT
+bool OpenKH::m_EnableKH1FontPatch = true;
+
+extern "C" {
+int kh1_cn_Apply(HMODULE module);
+}
+#endif
+
 const uint8_t quickmenupat[] = { 0xB1, 0x01, 0x90 };
 const wchar_t* gamefolders[] = {
     L"/kh1",
@@ -241,11 +246,13 @@ void OpenKH::Initialize()
             VirtualProtect(axaAppMain + off, sizeof(quickmenupat), pp, &pp);
         }
         break;
+#ifdef PANACEA_WITH_DYNAMIC_INJECT
     case GameId::KingdomHearts1:
         if (m_EnableKH1FontPatch) {
             kh1_cn_Apply(g_hInstance);
         }
         break;
+#endif
     }
 
     m_ModPath.append(gamefolders[(int)m_GameID]);
@@ -313,8 +320,10 @@ void OpenKH::ReadSettings(const char* filename)
             parseBool(value, m_EnableCache);
         else if (!strncmp(key, "sound_debug", sizeof(buf)))
             parseBool(value, m_SoundDebug);
+#ifdef PANACEA_WITH_DYNAMIC_INJECT
         else if (!strncmp(key, "kh1_font_patch", sizeof(buf)))
             parseBool(value, m_EnableKH1FontPatch);
+#endif
         else if (!strncmp(key, "quick_launch", sizeof(buf)))
         {
             if (!_stricmp(value, "kh1") || !_stricmp(value, "kh3d"))

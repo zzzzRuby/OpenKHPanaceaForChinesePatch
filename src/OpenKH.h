@@ -25,7 +25,9 @@ namespace OpenKH
     extern bool m_DebugLog;
     extern bool m_EnableCache;
     extern bool m_SoundDebug;
+#ifdef PANACEA_WITH_DYNAMIC_INJECT
     extern bool m_EnableKH1FontPatch;
+#endif
 
     void Initialize();
 
