@@ -25,6 +25,7 @@ namespace OpenKH
     extern bool m_DebugLog;
     extern bool m_EnableCache;
     extern bool m_SoundDebug;
+    extern bool m_EnableKH1FontPatch;
 
     void Initialize();
 
