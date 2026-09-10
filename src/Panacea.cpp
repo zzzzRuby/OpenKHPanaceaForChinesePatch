@@ -405,7 +405,6 @@ bool Panacea::TransformFilePath(wchar_t* strOutPath, int maxLength, const char* 
             return true;
     }
     swprintf_s(strOutPath, maxLength, L"%ls%hs\\%hs", OpenKH::m_ModPath.c_str(), prefix, actualFileName);
-    fwprintf(stdout, L"%s\n", strOutPath);
     if (FileExists(strOutPath))
         return true;
     if (!OpenKH::m_ExtractPath.empty())
