@@ -139,10 +139,12 @@ PFN_DECLARE(int, Axa_OpenFile, (const char* Format, int OFlag));
 PFN_DECLARE(void, Axa_DebugPrint, (const char* Format, ...));
 PFN_DECLARE(void, Axa_DecryptFile, (Axa::PackageFile* pkg, void* data, int size, Axa::PkgEntry* pkgent));
 PFN_DECLARE(__int64, Axa_DecompressFile, (void* outBuf, int* decSizePtr, void* inBuf, int compSize));
+#ifdef PANACEA_WITH_VAG_STREAM_HOOKS
 PFN_DECLARE(void, VAG_STREAM_play, (const char* fileName, int volume, int fadeVolume, int time));
 PFN_DECLARE(void, VAG_STREAM_fadeOut, (unsigned int time));
 PFN_DECLARE(void, VAG_STREAM_setVolume, (int volume));
 PFN_DECLARE(void, VAG_STREAM_exit, ());
+#endif
 PFN_DECLARE(size_t, Bbs_File_load, (const char* pszPath, long long a2));
 PFN_DECLARE(void, Bbs_CRsrcData_loadCallback, (unsigned int* pMem, size_t size, unsigned int* pArg, int nOpt));
 PFN_DECLARE(bool, OpenMovie, (void* player, const char* path));

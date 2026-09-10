@@ -21,10 +21,12 @@ PFN_DEFINE(Axa_OpenFile);
 PFN_DEFINE(Axa_DebugPrint);
 PFN_DEFINE(Axa_DecryptFile);
 PFN_DEFINE(Axa_DecompressFile);
+#ifdef PANACEA_WITH_VAG_STREAM_HOOKS
 PFN_DEFINE(VAG_STREAM_play);
 PFN_DEFINE(VAG_STREAM_fadeOut);
 PFN_DEFINE(VAG_STREAM_setVolume);
 PFN_DEFINE(VAG_STREAM_exit);
+#endif
 PFN_DEFINE(Bbs_File_load);
 PFN_DEFINE(Bbs_CRsrcData_loadCallback);
 PFN_DEFINE(OpenMovie);
@@ -108,6 +110,7 @@ __int64 Axa::DecompressFile(void* outBuf, int* decSizePtr, void* inBuf, int comp
     return pfn_Axa_DecompressFile(outBuf, decSizePtr, inBuf, compSize);
 }
 
+#ifdef PANACEA_WITH_VAG_STREAM_HOOKS
 void VAG_STREAM::play(const char* fileName, int volume, int fadeVolume, int time)
 {
     pfn_VAG_STREAM_play(fileName, volume, fadeVolume, time);
@@ -127,6 +130,7 @@ void VAG_STREAM::exit()
 {
     pfn_VAG_STREAM_exit();
 }
+#endif
 
 size_t Bbs::File::load(const char* filename, long long a2) {
     return pfn_Bbs_File_load(filename, a2);

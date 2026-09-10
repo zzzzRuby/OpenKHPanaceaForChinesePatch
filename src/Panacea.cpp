@@ -14,8 +14,10 @@
 #include "Panacea.h"
 #include "OpenKH.h"
 #include <cstdarg>
+#ifdef PANACEA_WITH_VAG_STREAM_HOOKS
 #include "bass.h"
 #include "bass_vgmstream.h"
+#endif
 #include <set>
 
 template <class TFunc>
@@ -239,10 +241,12 @@ Hook<PFN_Axa_CFileMan_GetRemasteredCount>* Hook_Axa_CFileMan_GetRemasteredCount;
 Hook<PFN_Axa_CFileMan_GetRemasteredEntry>* Hook_Axa_CFileMan_GetRemasteredEntry;
 Hook<PFN_Axa_PackageFile_GetRemasteredAsset>* Hook_Axa_PackageFile_GetRemasteredAsset;
 Hook<PFN_Axa_PackageFile_OpenFileImpl>* Hook_Axa_PackageFile_OpenFileImpl;
+#ifdef PANACEA_WITH_VAG_STREAM_HOOKS
 Hook<PFN_VAG_STREAM_play>* Hook_VAG_STREAM_play;
 Hook<PFN_VAG_STREAM_fadeOut>* Hook_VAG_STREAM_fadeOut;
 Hook<PFN_VAG_STREAM_setVolume>* Hook_VAG_STREAM_setVolume;
 Hook<PFN_VAG_STREAM_exit>* Hook_VAG_STREAM_exit;
+#endif
 Hook<PFN_Axa_DebugPrint>* Hook_Axa_DebugPrint;
 Hook<PFN_Bbs_File_load>* Hook_Bbs_File_load;
 Hook<PFN_Bbs_CRsrcData_loadCallback>* Hook_CRsrcData_loadCallback;
@@ -324,17 +328,17 @@ void Panacea::Initialize()
     Hook_Axa_CFileMan_GetRemasteredEntry = NewHook(pfn_Axa_CFileMan_GetRemasteredEntry, Panacea::GetRemasteredEntry, "Axa::CFileMan::GetRemasteredEntry");
     Hook_Axa_PackageFile_GetRemasteredAsset = NewHook(pfn_Axa_PackageFile_GetRemasteredAsset, Panacea::GetRemasteredAsset, "Axa::PackageFile::GetRemasteredAsset");
     Hook_Axa_PackageFile_OpenFileImpl = NewHook(pfn_Axa_PackageFile_OpenFileImpl, Panacea::OpenFileImpl, "Axa::PackageFile::OpenFileImpl");
+#ifdef PANACEA_WITH_VAG_STREAM_HOOKS
     Hook_VAG_STREAM_play = NewHook(pfn_VAG_STREAM_play, Panacea::VAG_STREAM::play, "VAG_STREAM::play");
     Hook_VAG_STREAM_fadeOut = NewHook(pfn_VAG_STREAM_fadeOut, Panacea::VAG_STREAM::fadeOut, "VAG_STREAM::fadeOut");
     Hook_VAG_STREAM_setVolume = NewHook(pfn_VAG_STREAM_setVolume, Panacea::VAG_STREAM::setVolume, "VAG_STREAM::setVolume");
     Hook_VAG_STREAM_exit = NewHook(pfn_VAG_STREAM_exit, Panacea::VAG_STREAM::exit, "VAG_STREAM::exit");
+#endif
     Hook_Axa_DebugPrint = NewHook(pfn_Axa_DebugPrint, Panacea::DebugPrint, "Axa::DebugPrint");
     //Hook_Bbs_File_load = NewHook(pfn_Bbs_File_load, Panacea::BbsFileLoad, "Bbs::File::Load");
     //Hook_CRsrcData_loadCallback = NewHook(pfn_Bbs_CRsrcData_loadCallback, Panacea::BbsCRsrcDataloadCallback, "Bbs::CRsrcData::loadCallback");
 
-    if (OpenKH::m_GameID == OpenKH::GameId::Theater) {
-        Hook_OpenMovie = NewHook(pfn_OpenMovie, Panacea::OpenMovie, "OpenMovie");
-    }
+    Hook_OpenMovie = NewHook(pfn_OpenMovie, Panacea::OpenMovie, "OpenMovie");
 
     if (!OpenKH::m_DevPath.empty())
         LoadDLLs(OpenKH::m_DevPath);
@@ -395,6 +399,16 @@ bool Panacea::TransformFilePath(wchar_t* strOutPath, int maxLength, const char* 
             basePathSize = basePathView.size();
         } else {
             prefix = "\\Mare";
+        }
+    } else if (OpenKH::m_GameID == OpenKH::GameId::Launcher2_8) {
+        if (filename2 != NULL) {
+            std::string_view basePathView = (const char*)filename2;
+            if (basePathView.ends_with("SettingMenu/WIN")) {
+                prefix = "\\SettingMenu";
+            }
+            basePathSize = basePathView.size();
+        } else {
+            prefix = "\\Launcher28";
         }
     }
     const char* actualFileName = originalPath + basePathSize + 1;
@@ -1444,6 +1458,7 @@ void* Panacea::GetRemasteredAsset(Axa::PackageFile* a1, unsigned int* assetSizeP
     return ret;
 }
 
+#ifdef PANACEA_WITH_VAG_STREAM_HOOKS
 float GetMusicVol()
 {
     Axa::PCSettings& pcset = PCSettingsPtr;
@@ -1539,6 +1554,7 @@ void Panacea::VAG_STREAM::exit()
         Hook_VAG_STREAM_exit->Patch();
     }
 }
+#endif
 
 void Panacea::DebugPrint(const char* format, ...)
 {
@@ -1572,7 +1588,7 @@ void __cdecl Panacea::BbsCRsrcDataloadCallback(unsigned int* pMem, size_t size, 
 bool Panacea::OpenMovie(void* player, const char* path)
 {
     wchar_t widePath[MAX_PATH];
-    MultiByteToWideChar(CP_UTF8, 0, path, -1, widePath, MAX_PATH);
+    MultiByteToWideChar(CP_ACP, 0, path, -1, widePath, MAX_PATH);
 
     wchar_t relPath[MAX_PATH];
 
@@ -1599,12 +1615,22 @@ bool Panacea::OpenMovie(void* player, const char* path)
 
     std::wstring modFilePath = CombinePaths(OpenKH::m_ModPath, relPath);
 
-    char newPath[MAX_PATH];
-    WideCharToMultiByte(CP_UTF8, 0, modFilePath.c_str(), -1, newPath, MAX_PATH, NULL, NULL);
-    if (OpenKH::m_DebugLog)
-        fprintf(stdout, "OpenMovie: %s\n", newPath);
+    if (GetFileAttributesW(modFilePath.c_str()) != INVALID_FILE_ATTRIBUTES) {
+        char newPath[MAX_PATH];
+        WideCharToMultiByte(CP_ACP, 0, modFilePath.c_str(), -1, newPath, MAX_PATH, NULL, NULL);
 
-    auto ret = Hook_OpenMovie->Unpatch()(player, newPath);
-    Hook_OpenMovie->Patch();
-    return ret;
+        if (OpenKH::m_DebugLog)
+            fprintf(stdout, "OpenMovie: %s\n", newPath);
+
+        auto ret = Hook_OpenMovie->Unpatch()(player, newPath);
+        Hook_OpenMovie->Patch();
+        return ret;
+    } else {
+        if (OpenKH::m_DebugLog)
+            fprintf(stdout, "OpenMovie: %s\n", path);
+
+        auto ret = Hook_OpenMovie->Unpatch()(player, path);
+        Hook_OpenMovie->Patch();
+        return ret;
+    }
 }

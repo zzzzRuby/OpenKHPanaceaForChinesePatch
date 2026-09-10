@@ -2,6 +2,8 @@ cmake_minimum_required(VERSION 3.21)
 
 project(OpenKhResearchPanacea LANGUAGES C CXX)
 
+option(PANACEA_WITH_VAG_STREAM_HOOKS "Build panacea with VAG_STREAM hooks" OFF)
+
 set(CMAKE_CONFIGURATION_TYPES Debug Release CACHE STRING "" FORCE)
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
@@ -27,9 +29,6 @@ set(PANACEA_SOURCES
 	src/Panacea.h)
 
 function(panacea_dll TARGET)
-	target_include_directories(${TARGET} PRIVATE
-		"${CMAKE_CURRENT_SOURCE_DIR}/dependencies"
-	)
 	target_compile_definitions(${TARGET} PRIVATE
 		UNICODE _UNICODE
 		_CRT_SECURE_NO_WARNINGS
@@ -46,8 +45,6 @@ function(panacea_dll TARGET)
 	target_link_options(${TARGET} PRIVATE
 		/SUBSYSTEM:WINDOWS
 		/MANIFESTUAC:NO
-		"/DELAYLOAD:bass.dll"
-		"/DELAYLOAD:bass_vgmstream.dll"
 		$<$<CONFIG:Release>:/DEBUG>
 		$<$<CONFIG:Release>:/OPT:ICF>
 		$<$<CONFIG:Release>:/OPT:REF>
@@ -58,10 +55,22 @@ function(panacea_dll TARGET)
 
 	target_link_libraries(${TARGET} PRIVATE
 		Shlwapi
-		"${CMAKE_CURRENT_SOURCE_DIR}/dependencies/bass.lib"
-		"${CMAKE_CURRENT_SOURCE_DIR}/dependencies/bass_vgmstream.lib"
-		delayimp
 	)
+	if (PANACEA_WITH_VAG_STREAM_HOOKS)
+		target_include_directories(${TARGET} PRIVATE
+			"${CMAKE_CURRENT_SOURCE_DIR}/dependencies"
+		)
+		target_compile_definitions(${TARGET} PRIVATE PANACEA_WITH_VAG_STREAM_HOOKS)
+		target_link_libraries(${TARGET} PRIVATE
+			"${CMAKE_CURRENT_SOURCE_DIR}/dependencies/bass.lib"
+			"${CMAKE_CURRENT_SOURCE_DIR}/dependencies/bass_vgmstream.lib"
+			delayimp
+		)
+		target_link_options(${TARGET} PRIVATE
+			"/DELAYLOAD:bass.dll"
+			"/DELAYLOAD:bass_vgmstream.dll"
+		)
+	endif()
 endfunction()
 
 add_library(OpenKH.Panacea SHARED ${PANACEA_SOURCES})
@@ -69,5 +78,5 @@ panacea_dll(OpenKH.Panacea)
 set_target_properties(OpenKH.Panacea PROPERTIES RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin/$<CONFIG>)
 add_library(OpenKH.Panacea.DI SHARED ${PANACEA_SOURCES} src/kh1_font_patch.c)
 panacea_dll(OpenKH.Panacea.DI)
-target_compile_definitions(OpenKH.Panacea.DI PRIVATE PANACEA_WITH_DYNAMIC_INJECT)
+target_compile_definitions(OpenKH.Panacea.DI PRIVATE PANACEA_WITH_FONT_PATCH)
 set_target_properties(OpenKH.Panacea.DI PROPERTIES RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin/$<CONFIG>/DI)

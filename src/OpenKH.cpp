@@ -84,19 +84,19 @@ void Hook()
     Hook(pfn_Axa_DebugPrint, "\x48\x89\x54\x24\x00\x4C\x89\x44\x24\x00\x4C\x89\x4C\x24\x00\xC3", "xxxx?xxxx?xxxx?x");
     Hook(pfn_Axa_DecryptFile, "\x40\x55\x56\x57\x48\x83\xEC\x50\x48\xC7\x44\x24\x00\x00\x00\x00\x00\x48\x89\x5C\x24\x00\x48\x8B\x05", "xxxxxxxxxxxx?????xxxx?xxx");
     Hook(pfn_Axa_DecompressFile, "\x40\x57\x48\x81\xEC\x00\x00\x00\x00\x8B\x02\x48\x8B\xFA\x89\x44\x24\x38\x48\x8D\x15", "xxxxx????xxxxxxxxxxxx");
+#ifdef PANACEA_WITH_VAG_STREAM_HOOKS
     Hook(pfn_VAG_STREAM_play, "\x48\x81\xEC\x00\x00\x00\x00\x48\x8B\x05\x00\x00\x00\x00\x48\x33\xC4\x48\x89\x84\x24\x00\x00\x00\x00\x48\x83\x3D\x00\x00\x00\x00\x00\x75\x35", "xxx????xxx????xxxxxxx????xxx?????xx");
     Hook(pfn_VAG_STREAM_fadeOut, "\x44\x8B\xC1\x48\x8B\x0D\x00\x00\x00\x00\x48\x85\xC9\x74\x08", "xxxxxx????xxxxx");
     Hook(pfn_VAG_STREAM_setVolume, "\x48\x8B\x05\x00\x00\x00\x00\x48\x85\xC0\x74\x1E\x0F", "xxx????xxxxxx");
     Hook(pfn_VAG_STREAM_exit, "\x48\x83\xEC\x28\x48\x8B\x0D\x00\x00\x00\x00\x0F", "xxxxxxx????x");
+#endif
     char* settingsfunc;
     Hook(settingsfunc, "\x40\x53\x48\x83\xEC\x20\x8B\xD9\x33\xD2\x48\x8D\x0D", "xxxxxxxxxxxxx");
     char* volumefunc;
     Hook(volumefunc, "\x40\x53\x48\x83\xEC\x50\x48\xC7\x44\x24\x00\x00\x00\x00\x00\x48\x63\xD9\x8D\x43\xFF\x83\xF8\x09\x77", "xxxxxxxxxx?????xxxxxxxxxx");
-    if (OpenKH::m_GameID == OpenKH::GameId::Theater) {
-        Hook(pfn_OpenMovie,
-            "\x48\x8B\xC4\x57\x41\x56\x41\x57\x48\x81\xEC\xE0\x04\x00\x00\x48\xC7\x44\x24\x40\xFE\xFF\xFF\xFF\x48\x89\x58\x08\x48\x89\x68\x18\x48\x89\x70\x20\x48\x8B\x05",
-            "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx");
-    }
+    Hook(pfn_OpenMovie,
+        "\x48\x8B\xC4\x57\x41\x56\x41\x57\x48\x81\xEC\xE0\x04\x00\x00\x48\xC7\x44\x24\x40\xFE\xFF\xFF\xFF\x48\x89\x58\x08\x48\x89\x68\x18\x48\x89\x70\x20\x48\x8B\x05",
+        "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx");
     FindAllFuncs();
     GetVarPtr(PackageFileCount, (char*)pfn_Axa_PackageMan_GetFileInfo + 0x1A);
     GetVarPtr(LastOpenedPackage, (char*)pfn_Axa_CFileMan_GetRemasteredCount + 3);
@@ -126,7 +126,7 @@ bool OpenKH::m_EnableCache = true;
 bool OpenKH::m_SoundDebug = false;
 bool QuickMenu = false;
 
-#ifdef PANACEA_WITH_DYNAMIC_INJECT
+#ifdef PANACEA_WITH_FONT_PATCH
 bool OpenKH::m_EnableKH1FontPatch = true;
 
 extern "C" {
@@ -251,7 +251,7 @@ void OpenKH::Initialize()
             VirtualProtect(axaAppMain + off, sizeof(quickmenupat), pp, &pp);
         }
         break;
-#ifdef PANACEA_WITH_DYNAMIC_INJECT
+#ifdef PANACEA_WITH_FONT_PATCH
     case GameId::KingdomHearts1:
         if (m_EnableKH1FontPatch) {
             kh1_cn_Apply(g_hInstance);
@@ -325,7 +325,7 @@ void OpenKH::ReadSettings(const char* filename)
             parseBool(value, m_EnableCache);
         else if (!strncmp(key, "sound_debug", sizeof(buf)))
             parseBool(value, m_SoundDebug);
-#ifdef PANACEA_WITH_DYNAMIC_INJECT
+#ifdef PANACEA_WITH_FONT_PATCH
         else if (!strncmp(key, "kh1_font_patch", sizeof(buf)))
             parseBool(value, m_EnableKH1FontPatch);
 #endif

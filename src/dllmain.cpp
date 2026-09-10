@@ -102,10 +102,10 @@ BOOL APIENTRY DllMain(
     DWORD ul_reason_for_call,
     LPVOID lpReserved)
 {
-
+#ifdef PANACEA_WITH_VAG_STREAM_HOOKS
     std::wstring _dllPath = std::filesystem::current_path().wstring() + L"\\dependencies\\";
     SetDllDirectoryW(_dllPath.c_str());
-
+#endif
     switch (ul_reason_for_call)
     {
     case DLL_PROCESS_ATTACH:
