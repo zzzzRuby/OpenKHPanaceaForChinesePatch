@@ -246,6 +246,8 @@ Hook<PFN_VAG_STREAM_exit>* Hook_VAG_STREAM_exit;
 Hook<PFN_Axa_DebugPrint>* Hook_Axa_DebugPrint;
 Hook<PFN_Bbs_File_load>* Hook_Bbs_File_load;
 Hook<PFN_Bbs_CRsrcData_loadCallback>* Hook_CRsrcData_loadCallback;
+Hook<PFN_OpenMovie>* Hook_OpenMovie;
+
 std::vector<void(*)()> framefuncs;
 int bassinit;
 int basschan;
@@ -329,6 +331,10 @@ void Panacea::Initialize()
     Hook_Axa_DebugPrint = NewHook(pfn_Axa_DebugPrint, Panacea::DebugPrint, "Axa::DebugPrint");
     //Hook_Bbs_File_load = NewHook(pfn_Bbs_File_load, Panacea::BbsFileLoad, "Bbs::File::Load");
     //Hook_CRsrcData_loadCallback = NewHook(pfn_Bbs_CRsrcData_loadCallback, Panacea::BbsCRsrcDataloadCallback, "Bbs::CRsrcData::loadCallback");
+
+    if (OpenKH::m_GameID == OpenKH::GameId::Theater) {
+        Hook_OpenMovie = NewHook(pfn_OpenMovie, Panacea::OpenMovie, "OpenMovie");
+    }
 
     if (!OpenKH::m_DevPath.empty())
         LoadDLLs(OpenKH::m_DevPath);
@@ -1548,4 +1554,44 @@ void __cdecl Panacea::BbsCRsrcDataloadCallback(unsigned int* pMem, size_t size, 
         fprintf(stdout, "CRsrcData::loadCallback(0x%p, %lli, 0x%p, %i)\n", pMem, size, pArg, nOpt);
     Hook_CRsrcData_loadCallback->Unpatch()(pMem, size, pArg, nOpt);
     Hook_CRsrcData_loadCallback->Patch();
+}
+
+bool Panacea::OpenMovie(void* player, const char* path)
+{
+    wchar_t widePath[MAX_PATH];
+    MultiByteToWideChar(CP_UTF8, 0, path, -1, widePath, MAX_PATH);
+
+    wchar_t relPath[MAX_PATH];
+
+    if (!PathIsRelativeW(widePath))
+    {
+        wchar_t exePath[MAX_PATH];
+        GetModuleFileNameW(NULL, exePath, MAX_PATH);
+        PathRemoveFileSpecW(exePath);
+
+        if (PathRelativePathToW(relPath, exePath, FILE_ATTRIBUTE_DIRECTORY, widePath, FILE_ATTRIBUTE_NORMAL))
+        {
+            if (relPath[0] == L'.' && relPath[1] == L'\\')
+                wcscpy_s(relPath, MAX_PATH, relPath + 2);
+        }
+        else
+        {
+            wcscpy_s(relPath, MAX_PATH, widePath);
+        }
+    }
+    else
+    {
+        wcscpy_s(relPath, MAX_PATH, widePath);
+    }
+
+    std::wstring modFilePath = CombinePaths(OpenKH::m_ModPath, relPath);
+
+    char newPath[MAX_PATH];
+    WideCharToMultiByte(CP_UTF8, 0, modFilePath.c_str(), -1, newPath, MAX_PATH, NULL, NULL);
+    if (OpenKH::m_DebugLog)
+        fprintf(stdout, "OpenMovie: %s\n", newPath);
+
+    auto ret = Hook_OpenMovie->Unpatch()(player, newPath);
+    Hook_OpenMovie->Patch();
+    return ret;
 }

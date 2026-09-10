@@ -29,5 +29,7 @@ namespace Panacea
 
     size_t __cdecl BbsFileLoad(const char* filename, long long a2);
     void __cdecl BbsCRsrcDataloadCallback(unsigned int* pMem, size_t size, unsigned int* pArg, int nOpt);
+
+    bool __cdecl OpenMovie(void* player, const char* path);
 }
 

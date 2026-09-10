@@ -145,6 +145,7 @@ PFN_DECLARE(void, VAG_STREAM_setVolume, (int volume));
 PFN_DECLARE(void, VAG_STREAM_exit, ());
 PFN_DECLARE(size_t, Bbs_File_load, (const char* pszPath, long long a2));
 PFN_DECLARE(void, Bbs_CRsrcData_loadCallback, (unsigned int* pMem, size_t size, unsigned int* pArg, int nOpt));
+PFN_DECLARE(bool, OpenMovie, (void* player, const char* path));
 
 template <typename T>
 class VarPtr

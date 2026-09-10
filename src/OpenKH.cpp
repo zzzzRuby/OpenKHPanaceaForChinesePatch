@@ -92,6 +92,11 @@ void Hook()
     Hook(settingsfunc, "\x40\x53\x48\x83\xEC\x20\x8B\xD9\x33\xD2\x48\x8D\x0D", "xxxxxxxxxxxxx");
     char* volumefunc;
     Hook(volumefunc, "\x40\x53\x48\x83\xEC\x50\x48\xC7\x44\x24\x00\x00\x00\x00\x00\x48\x63\xD9\x8D\x43\xFF\x83\xF8\x09\x77", "xxxxxxxxxx?????xxxxxxxxxx");
+    if (OpenKH::m_GameID == OpenKH::GameId::Theater) {
+        Hook(pfn_OpenMovie,
+            "\x48\x8B\xC4\x57\x41\x56\x41\x57\x48\x81\xEC\xE0\x04\x00\x00\x48\xC7\x44\x24\x40\xFE\xFF\xFF\xFF\x48\x89\x58\x08\x48\x89\x68\x18\x48\x89\x70\x20\x48\x8B\x05",
+            "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx");
+    }
     FindAllFuncs();
     GetVarPtr(PackageFileCount, (char*)pfn_Axa_PackageMan_GetFileInfo + 0x1A);
     GetVarPtr(LastOpenedPackage, (char*)pfn_Axa_CFileMan_GetRemasteredCount + 3);

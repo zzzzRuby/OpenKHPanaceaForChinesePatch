@@ -27,6 +27,7 @@ PFN_DEFINE(VAG_STREAM_setVolume);
 PFN_DEFINE(VAG_STREAM_exit);
 PFN_DEFINE(Bbs_File_load);
 PFN_DEFINE(Bbs_CRsrcData_loadCallback);
+PFN_DEFINE(OpenMovie);
 
 long Axa::CFileMan::LoadFile(CFileMan* _this, const char* filename, void* addr, bool useHdAsset) {
     return pfn_Axa_CFileMan_LoadFile(_this, filename, addr, useHdAsset);
