@@ -382,21 +382,35 @@ bool Panacea::GetRawFile(wchar_t* strOutPath, int maxLength, const char* origina
     return FileExists(strOutPath);
 }
 
-bool Panacea::TransformFilePath(wchar_t* strOutPath, int maxLength, const char* originalPath)
+bool Panacea::TransformFilePath(wchar_t* strOutPath, int maxLength, const char* originalPath, const char* filename2)
 {
-    const char* actualFileName = originalPath + strlen(BasePath) + 1;
+    const char* prefix = "";
+    size_t basePathSize = strlen(BasePath);
+    if (OpenKH::m_GameID == OpenKH::GameId::Launcher1_5_2_5) {
+        if (filename2 != NULL) {
+            std::string_view basePathView = (const char*)filename2;
+            if (basePathView.ends_with("SettingMenu/WIN")) {
+                prefix = "\\SettingMenu";
+            }
+            basePathSize = basePathView.size();
+        } else {
+            prefix = "\\Mare";
+        }
+    }
+    const char* actualFileName = originalPath + basePathSize + 1;
     if (!OpenKH::m_DevPath.empty())
     {
-        swprintf_s(strOutPath, maxLength, L"%ls\\%hs", OpenKH::m_DevPath.c_str(), actualFileName);
+        swprintf_s(strOutPath, maxLength, L"%ls%hs\\%hs", OpenKH::m_DevPath.c_str(), prefix, actualFileName);
         if (FileExists(strOutPath))
             return true;
     }
-    swprintf_s(strOutPath, maxLength, L"%ls\\%hs", OpenKH::m_ModPath.c_str(), actualFileName);
+    swprintf_s(strOutPath, maxLength, L"%ls%hs\\%hs", OpenKH::m_ModPath.c_str(), prefix, actualFileName);
+    fwprintf(stdout, L"%s\n", strOutPath);
     if (FileExists(strOutPath))
         return true;
     if (!OpenKH::m_ExtractPath.empty())
     {
-        swprintf_s(strOutPath, maxLength, L"%ls\\%hs", OpenKH::m_ExtractPath.c_str(), actualFileName);
+        swprintf_s(strOutPath, maxLength, L"%ls%hs\\%hs", OpenKH::m_ExtractPath.c_str(), prefix, actualFileName);
         return FileExists(strOutPath);
     }
     return false;
@@ -1214,7 +1228,7 @@ void* __cdecl Panacea::LoadFileWithMalloc(Axa::CFileMan* _this, const char* file
             return addr;
         return 0;
     }
-    else if (!TransformFilePath(path, sizeof(path), filename))
+    else if (!TransformFilePath(path, sizeof(path), filename, filename2))
     {
         if (OpenKH::m_DebugLog)
             fprintf(stdout, "LoadFileWithMalloc(\"%s\", %d, \"%s\")\n", filename, useHdAsset, filename2);

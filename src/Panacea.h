@@ -5,7 +5,7 @@ namespace Panacea
 {
     void Initialize();
     bool GetRawFile(wchar_t* strOutPath, int maxLength, const char* originalPath);
-    bool TransformFilePath(wchar_t* strOutPath, int maxLength, const char* originalPath);
+    bool TransformFilePath(wchar_t* strOutPath, int maxLength, const char* originalPath, const char* filename2 = NULL);
     int FrameHook(__int64 a1);
 
     int SetReplacePath(__int64 a1, const char* a2);

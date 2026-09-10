@@ -103,9 +103,8 @@ BOOL APIENTRY DllMain(
     LPVOID lpReserved)
 {
 
-    std::string _dllPath = std::filesystem::current_path().u8string() + "\\dependencies\\";
-    std::wstring _dllString(_dllPath.begin(), _dllPath.end());
-    SetDllDirectory(_dllString.c_str());
+    std::wstring _dllPath = std::filesystem::current_path().wstring() + L"\\dependencies\\";
+    SetDllDirectoryW(_dllPath.c_str());
 
     switch (ul_reason_for_call)
     {
