@@ -75,8 +75,12 @@ endfunction()
 
 add_library(OpenKH.Panacea SHARED ${PANACEA_SOURCES})
 panacea_dll(OpenKH.Panacea)
-set_target_properties(OpenKH.Panacea PROPERTIES RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin/$<CONFIG>)
+set_target_properties(OpenKH.Panacea PROPERTIES
+	ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin/$<CONFIG>
+	RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin/$<CONFIG>)
 add_library(OpenKH.Panacea.DI SHARED ${PANACEA_SOURCES} src/kh1_font_patch.c)
 panacea_dll(OpenKH.Panacea.DI)
 target_compile_definitions(OpenKH.Panacea.DI PRIVATE PANACEA_WITH_FONT_PATCH)
-set_target_properties(OpenKH.Panacea.DI PROPERTIES RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin/$<CONFIG>/DI)
+set_target_properties(OpenKH.Panacea.DI PROPERTIES 
+	ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin/$<CONFIG>/DI
+	RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin/$<CONFIG>/DI)
