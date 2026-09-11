@@ -1,0 +1,51 @@
+name: Windows x64 Build & Release
+ 
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+  workflow_dispatch:
+ 
+env:
+  BUILD_TYPE: Release
+ 
+jobs:
+  build:
+    name: MSVC x64
+    runs-on: windows-latest
+ 
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+ 
+      - name: Configure
+        run: cmake -B build -A x64 -DCMAKE_BUILD_TYPE=${{ env.BUILD_TYPE }}
+ 
+      - name: Build
+        run: cmake --build build --config ${{ env.BUILD_TYPE }} --parallel
+ 
+      - name: Collect
+        shell: pwsh
+        run: |
+          New-Item -ItemType Directory -Force staging | Out-Null
+          cmake --install build --config ${{ env.BUILD_TYPE }} --prefix staging
+          if ($LASTEXITCODE -ne 0 -or -not (Test-Path 'staging/*')) {
+            Write-Host 'No install rules, fallback to build output'
+            Copy-Item "build/bin/${{ env.BUILD_TYPE }}/**/*.dll" -Destination staging -Recurse -Force
+            $global:LASTEXITCODE = 0
+          }
+ 
+      - name: Package
+        shell: pwsh
+        run: |
+          $name = ('${{ github.event.repository.name }}-${{ github.ref_name }}-windows-x64').Replace('/','-')
+          Compress-Archive -Path staging/* -DestinationPath "$name.zip"
+          Add-Content $env:GITHUB_ENV "PACKAGE=$name.zip"
+ 
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ github.event.repository.name }}-windows-x64
+          path: ${{ env.PACKAGE }}
+          if-no-files-found: error
