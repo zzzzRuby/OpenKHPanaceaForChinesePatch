@@ -1,6 +1,6 @@
 # OpenKHPanaceaForChinesePatch
 
-基于 https://github.com commit `7a3b945c538d32c6a285128c98aefba093f52ceb` 修改而来
+基于 [OpenKH](https://github.com/OpenKH/OpenKh) commit `7a3b945c538d32c6a285128c98aefba093f52ceb` 修改而来
 
 ## 新增功能：
 * 1.5+2.5的Launcher可以读取mod文件
