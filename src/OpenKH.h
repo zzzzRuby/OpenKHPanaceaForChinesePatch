@@ -21,6 +21,7 @@ namespace OpenKH
     extern std::wstring m_ModPath;
     extern std::wstring m_DevPath;
     extern std::wstring m_ExtractPath;
+    extern std::wstring m_SettingModPath;
     extern bool m_ShowConsole;
     extern bool m_DebugLog;
     extern bool m_EnableCache;

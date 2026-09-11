@@ -120,6 +120,7 @@ OpenKH::GameId OpenKH::m_GameID = OpenKH::GameId::Unknown;
 std::wstring OpenKH::m_ModPath = L"./mod";
 std::wstring OpenKH::m_DevPath = L"";
 std::wstring OpenKH::m_ExtractPath = L"";
+std::wstring OpenKH::m_SettingModPath = L"";
 bool OpenKH::m_ShowConsole = false;
 bool OpenKH::m_DebugLog = false;
 bool OpenKH::m_EnableCache = true;
@@ -260,6 +261,7 @@ void OpenKH::Initialize()
 #endif
     }
 
+    m_SettingModPath = m_ModPath + L"/setting";
     m_ModPath.append(gamefolders[(int)m_GameID]);
     if (m_DevPath.size() > 0)
         m_DevPath.append(gamefolders[(int)m_GameID]);
