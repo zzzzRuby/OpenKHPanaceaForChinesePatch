@@ -127,11 +127,13 @@ bool OpenKH::m_EnableCache = true;
 bool OpenKH::m_SoundDebug = false;
 bool QuickMenu = false;
 
-#ifdef PANACEA_WITH_FONT_PATCH
-bool OpenKH::m_EnableKH1FontPatch = true;
+#ifdef PANACEA_WITH_CN_INJECT
+bool OpenKH::m_EnableZhCnInject = true;
 
 extern "C" {
 int kh1_cn_Apply(HMODULE module);
+int khlauncher_cn_Apply(HMODULE module);
+int khtheater_cn_Apply(HMODULE module);
 }
 #endif
 
@@ -252,14 +254,24 @@ void OpenKH::Initialize()
             VirtualProtect(axaAppMain + off, sizeof(quickmenupat), pp, &pp);
         }
         break;
-#ifdef PANACEA_WITH_FONT_PATCH
-    case GameId::KingdomHearts1:
-        if (m_EnableKH1FontPatch) {
-            kh1_cn_Apply(g_hInstance);
-        }
-        break;
-#endif
     }
+    
+#ifdef PANACEA_WITH_CN_INJECT
+        if (m_EnableZhCnInject) {
+            switch (m_GameID)
+            {
+            case GameId::KingdomHearts1:
+                kh1_cn_Apply(g_hInstance);
+                break;
+            case GameId::Launcher1_5_2_5:
+                khlauncher_cn_Apply(g_hInstance);
+                break;
+            case GameId::Theater:
+                khtheater_cn_Apply(g_hInstance);
+                break;
+            }
+        }
+#endif
 
     m_SettingModPath = m_ModPath + L"/setting";
     m_ModPath.append(gamefolders[(int)m_GameID]);
@@ -327,9 +339,9 @@ void OpenKH::ReadSettings(const char* filename)
             parseBool(value, m_EnableCache);
         else if (!strncmp(key, "sound_debug", sizeof(buf)))
             parseBool(value, m_SoundDebug);
-#ifdef PANACEA_WITH_FONT_PATCH
-        else if (!strncmp(key, "kh1_font_patch", sizeof(buf)))
-            parseBool(value, m_EnableKH1FontPatch);
+#ifdef PANACEA_WITH_CN_INJECT
+        else if (!strncmp(key, "zh_cn_inject", sizeof(buf)))
+            parseBool(value, m_EnableZhCnInject);
 #endif
         else if (!strncmp(key, "quick_launch", sizeof(buf)))
         {

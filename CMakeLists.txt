@@ -26,7 +26,14 @@ set(PANACEA_SOURCES
 	src/Panacea.cpp
 	src/KingdomApi.h
 	src/OpenKH.h
-	src/Panacea.h)
+	src/Panacea.h
+)
+
+set(ZH_CN_INJECT_SOURCES
+	src/zh_cn_inject/kh1_cn_patch.c
+	src/zh_cn_inject/khlauncher_cn_patch.c
+	src/zh_cn_inject/khtheater_cn_patch.c
+)
 
 function(panacea_dll TARGET)
 	target_compile_definitions(${TARGET} PRIVATE
@@ -78,9 +85,9 @@ panacea_dll(OpenKH.Panacea)
 set_target_properties(OpenKH.Panacea PROPERTIES
 	ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin/$<CONFIG>
 	RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin/$<CONFIG>)
-add_library(OpenKH.Panacea.DI SHARED ${PANACEA_SOURCES} src/kh1_font_patch.c)
+add_library(OpenKH.Panacea.DI SHARED ${PANACEA_SOURCES} ${ZH_CN_INJECT_SOURCES})
 panacea_dll(OpenKH.Panacea.DI)
-target_compile_definitions(OpenKH.Panacea.DI PRIVATE PANACEA_WITH_FONT_PATCH)
+target_compile_definitions(OpenKH.Panacea.DI PRIVATE PANACEA_WITH_CN_INJECT)
 set_target_properties(OpenKH.Panacea.DI PROPERTIES 
 	ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin/$<CONFIG>/DI
 	RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin/$<CONFIG>/DI)
