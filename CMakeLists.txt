@@ -30,9 +30,9 @@ set(PANACEA_SOURCES
 )
 
 set(ZH_CN_INJECT_SOURCES
-	src/zh_cn_inject/kh1_cn_patch.c
-	src/zh_cn_inject/khlauncher_cn_patch.c
-	src/zh_cn_inject/khtheater_cn_patch.c
+	src/zh_cn_inject/kh1_cn_steam_patch.c
+	src/zh_cn_inject/khlauncher_cn_steam_patch.c
+	src/zh_cn_inject/khtheater_cn_steam_patch.c
 )
 
 function(panacea_dll TARGET)

@@ -131,13 +131,17 @@ bool QuickMenu = false;
 bool OpenKH::m_EnableZhCnInject = true;
 
 extern "C" {
-int kh1_cn_Apply(HMODULE module);
-int khlauncher_cn_Apply(HMODULE module);
-int khtheater_cn_Apply(HMODULE module);
+int kh1_cn_steam_Apply(HMODULE module);
+int khlauncher_cn_steam_Apply(HMODULE module);
+int khtheater_cn_steam_Apply(HMODULE module);
 }
 
 static bool IsSteam() noexcept {
     return GetModuleHandleW(L"steam_api64.dll") != NULL;
+}
+
+static bool IsEpic() noexcept {
+    return GetModuleHandleW(L"EOSSDK-Win64-Shipping.dll") != NULL;
 }
 #endif
 
@@ -261,18 +265,22 @@ void OpenKH::Initialize()
     }
     
 #ifdef PANACEA_WITH_CN_INJECT
-        if (m_EnableZhCnInject && IsSteam()) {
-            switch (m_GameID)
-            {
-            case GameId::KingdomHearts1:
-                kh1_cn_Apply(g_hInstance);
-                break;
-            case GameId::Launcher1_5_2_5:
-                khlauncher_cn_Apply(g_hInstance);
-                break;
-            case GameId::Theater:
-                khtheater_cn_Apply(g_hInstance);
-                break;
+        if (m_EnableZhCnInject) {
+            if (IsSteam()) {
+                switch (m_GameID)
+                {
+                case GameId::KingdomHearts1:
+                    kh1_cn_steam_Apply(g_hInstance);
+                    break;
+                case GameId::Launcher1_5_2_5:
+                    khlauncher_cn_steam_Apply(g_hInstance);
+                    break;
+                case GameId::Theater:
+                    khtheater_cn_steam_Apply(g_hInstance);
+                    break;
+                }
+            } else if (IsEpic()) {
+
             }
         }
 #endif
