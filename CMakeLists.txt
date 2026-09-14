@@ -48,6 +48,7 @@ function(panacea_dll TARGET)
 		/sdl
 		/permissive-
 		$<$<CONFIG:Release>:/Zi>
+		/Gy /Gw
 	)
 	target_link_options(${TARGET} PRIVATE
 		/SUBSYSTEM:WINDOWS

@@ -135,6 +135,10 @@ int kh1_cn_Apply(HMODULE module);
 int khlauncher_cn_Apply(HMODULE module);
 int khtheater_cn_Apply(HMODULE module);
 }
+
+static bool IsSteam() noexcept {
+    return GetModuleHandleW(L"steam_api64.dll") != NULL;
+}
 #endif
 
 const uint8_t quickmenupat[] = { 0xB1, 0x01, 0x90 };
@@ -257,7 +261,7 @@ void OpenKH::Initialize()
     }
     
 #ifdef PANACEA_WITH_CN_INJECT
-        if (m_EnableZhCnInject) {
+        if (m_EnableZhCnInject && IsSteam()) {
             switch (m_GameID)
             {
             case GameId::KingdomHearts1:

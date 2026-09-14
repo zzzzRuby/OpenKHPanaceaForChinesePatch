@@ -15,3 +15,6 @@
 
 ## 与原版Panacea的不同点：
 * 默认移除了VAG_STREAM相关的hook，不再需要dependencies目录（可以通过开启cmake option的PANACEA_WITH_VAG_STREAM_HOOKS将这个功能增加回来）
+
+## 注意事项
+* 汉化注入相关部分只支持steam版
