@@ -1571,6 +1571,23 @@ void __cdecl Panacea::BbsCRsrcDataloadCallback(unsigned int* pMem, size_t size, 
     Hook_CRsrcData_loadCallback->Patch();
 }
 
+inline bool IsPathSeparatorW(wchar_t c) { return c == L'/' || c == L'\\'; }
+
+void ReplaceJpComponentW(std::wstring& path) {
+    size_t pos = 0;
+    while ((pos = path.find(L"jp", pos)) != std::wstring::npos) {
+        bool matchBefore = (pos == 0) || IsPathSeparatorW(path[pos - 1]);
+        bool matchAfter = (pos + 2 == path.length()) || IsPathSeparatorW(path[pos + 2]);
+
+        if (matchBefore && matchAfter) {
+            path.replace(pos, 2, L"dt");
+            pos += 2;
+        } else {
+            pos += 1;
+        }
+    }
+}
+
 bool Panacea::OpenMovie(void* player, const char* path)
 {
     wchar_t widePath[MAX_PATH];
@@ -1584,7 +1601,23 @@ bool Panacea::OpenMovie(void* player, const char* path)
         GetModuleFileNameW(NULL, exePath, MAX_PATH);
         PathRemoveFileSpecW(exePath);
 
-        if (PathRelativePathToW(relPath, exePath, FILE_ATTRIBUTE_DIRECTORY, widePath, FILE_ATTRIBUTE_NORMAL))
+        std::wstring baseExePath(exePath);
+        if (OpenKH::m_GameStoreId == OpenKH::GameStoreId::Epic)
+        {
+            baseExePath = CombinePaths(baseExePath, L"EPIC");
+        }
+        else if (OpenKH::m_GameStoreId == OpenKH::GameStoreId::Steam)
+        {
+            baseExePath = CombinePaths(baseExePath, L"STEAM");
+        }
+
+        for (int i = 0; i < ARRAYSIZE(widePath) && widePath[i] != L'\0'; ++i) {
+            if (widePath[i] == L'/') {
+                widePath[i] = L'\\';
+            }
+        }
+
+        if (PathRelativePathToW(relPath, baseExePath.c_str(), FILE_ATTRIBUTE_DIRECTORY, widePath, FILE_ATTRIBUTE_NORMAL))
         {
             if (relPath[0] == L'.' && relPath[1] == L'\\')
                 wcscpy_s(relPath, MAX_PATH, relPath + 2);
@@ -1599,7 +1632,13 @@ bool Panacea::OpenMovie(void* player, const char* path)
         wcscpy_s(relPath, MAX_PATH, widePath);
     }
 
-    std::wstring modFilePath = CombinePaths(OpenKH::m_ModPath, relPath);
+    std::wstring finalRelPath(relPath);
+
+    if (OpenKH::m_GameStoreId == OpenKH::GameStoreId::Epic) {
+        ReplaceJpComponentW(finalRelPath);
+    }
+
+    std::wstring modFilePath = CombinePaths(CombinePaths(OpenKH::m_ModPath, L"video"), finalRelPath.c_str());
 
     if (GetFileAttributesW(modFilePath.c_str()) != INVALID_FILE_ATTRIBUTES) {
         char newPath[MAX_PATH];

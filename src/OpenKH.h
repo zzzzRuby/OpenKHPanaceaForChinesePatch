@@ -17,6 +17,13 @@ namespace OpenKH
         END,
     };
 
+    enum class GameStoreId {
+        Epic,
+        Steam,
+        Unknown = -1,
+    };
+
+    extern GameStoreId m_GameStoreId;
     extern GameId m_GameID;
     extern std::wstring m_ModPath;
     extern std::wstring m_DevPath;

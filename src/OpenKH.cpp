@@ -116,6 +116,7 @@ void QuickBootHook()
     ExitProcess(QuickLaunch);
 }
 
+OpenKH::GameStoreId OpenKH::m_GameStoreId = OpenKH::GameStoreId::Unknown;
 OpenKH::GameId OpenKH::m_GameID = OpenKH::GameId::Unknown;
 std::wstring OpenKH::m_ModPath = L"./mod";
 std::wstring OpenKH::m_DevPath = L"";
@@ -127,6 +128,14 @@ bool OpenKH::m_EnableCache = true;
 bool OpenKH::m_SoundDebug = false;
 bool QuickMenu = false;
 
+static bool IsSteam() noexcept {
+    return GetModuleHandleW(L"steam_api64.dll") != NULL;
+}
+
+static bool IsEpic() noexcept {
+    return GetModuleHandleW(L"EOSSDK-Win64-Shipping.dll") != NULL;
+}
+
 #ifdef PANACEA_WITH_CN_INJECT
 bool OpenKH::m_EnableZhCnInject = true;
 
@@ -134,14 +143,6 @@ extern "C" {
 int kh1_cn_steam_Apply(HMODULE module);
 int khlauncher_cn_steam_Apply(HMODULE module);
 int khtheater_cn_steam_Apply(HMODULE module);
-}
-
-static bool IsSteam() noexcept {
-    return GetModuleHandleW(L"steam_api64.dll") != NULL;
-}
-
-static bool IsEpic() noexcept {
-    return GetModuleHandleW(L"EOSSDK-Win64-Shipping.dll") != NULL;
 }
 #endif
 
@@ -174,6 +175,11 @@ void OpenKH::Initialize()
     fprintf(stdout, "Executable instance at %p\n", g_hInstance);
     fprintf(stdout, "Fetch source from https://github.com/zzzzRuby/OpenKHPanaceaForChinesePatch\n");
     m_GameID = DetectGame();
+    if (IsSteam()) {
+        m_GameStoreId = GameStoreId::Steam;
+    } else if (IsEpic()) {
+        m_GameStoreId = GameStoreId::Epic;
+    }
     switch (m_GameID)
     {
     case OpenKH::GameId::Unknown:

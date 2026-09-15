@@ -18,3 +18,6 @@
 
 ## 注意事项
 * 汉化注入相关部分只支持steam版
+
+## 关于OpenMovie hook
+* 因为Epic版的日版视频路径跟Steam版的日版不太一样，Epic版会用jp路径，Steam版会用dt路径，为了方便补丁制作所以当检测到运行的是Epic版的时候，会把路径里的jp文件夹全部替换成dt
