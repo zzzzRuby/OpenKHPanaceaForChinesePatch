@@ -139,7 +139,7 @@ static bool IsEpic() noexcept {
 #ifdef PANACEA_WITH_CN_INJECT
 bool OpenKH::m_EnableZhCnInject = true;
 
-extern "C" {
+namespace Shiro {
 int kh1_cn_steam_Apply(HMODULE module);
 int khlauncher_cn_steam_Apply(HMODULE module);
 int khtheater_cn_steam_Apply(HMODULE module);
@@ -276,13 +276,13 @@ void OpenKH::Initialize()
                 switch (m_GameID)
                 {
                 case GameId::KingdomHearts1:
-                    kh1_cn_steam_Apply(g_hInstance);
+                    Shiro::kh1_cn_steam_Apply(g_hInstance);
                     break;
                 case GameId::Launcher1_5_2_5:
-                    khlauncher_cn_steam_Apply(g_hInstance);
+                    Shiro::khlauncher_cn_steam_Apply(g_hInstance);
                     break;
                 case GameId::Theater:
-                    khtheater_cn_steam_Apply(g_hInstance);
+                    Shiro::khtheater_cn_steam_Apply(g_hInstance);
                     break;
                 }
             } else if (IsEpic()) {

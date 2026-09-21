@@ -15,7 +15,7 @@ set(CMAKE_C_EXTENSIONS OFF)
 set(CMAKE_MSVC_RUNTIME_LIBRARY
 	"$<$<CONFIG:Debug>:MultiThreadedDebugDLL>$<$<NOT:$<CONFIG:Debug>>:MultiThreaded>")
 
-if (NOT MSVC)
+if (NOT "${CMAKE_CXX_COMPILER_ID}" STREQUAL "MSVC" AND NOT "${CMAKE_CXX_SIMULATE_ID}" STREQUAL "MSVC")
 	message(FATAL_ERROR "Panacea must be built with MSVC")
 endif()
 
@@ -30,9 +30,7 @@ set(PANACEA_SOURCES
 )
 
 set(ZH_CN_INJECT_SOURCES
-	src/zh_cn_inject/kh1_cn_steam_patch.c
-	src/zh_cn_inject/khlauncher_cn_steam_patch.c
-	src/zh_cn_inject/khtheater_cn_steam_patch.c
+	src/zh_cn_inject/zh_cn_inject.cpp
 )
 
 function(panacea_dll TARGET)
@@ -53,7 +51,6 @@ function(panacea_dll TARGET)
 	target_link_options(${TARGET} PRIVATE
 		/SUBSYSTEM:WINDOWS
 		/MANIFESTUAC:NO
-		$<$<CONFIG:Release>:/DEBUG>
 		$<$<CONFIG:Release>:/OPT:ICF>
 		$<$<CONFIG:Release>:/OPT:REF>
 	)
