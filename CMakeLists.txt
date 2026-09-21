@@ -39,13 +39,11 @@ function(panacea_dll TARGET)
 		_CRT_SECURE_NO_WARNINGS
 		_WINDOWS
 		_USRDLL
-		OPENKHRESEARCHPANACEA_EXPORTS
 	)
 	target_compile_options(${TARGET} PRIVATE
 		/W3
 		/sdl
 		/permissive-
-		$<$<CONFIG:Release>:/Zi>
 		/Gy /Gw
 	)
 	target_link_options(${TARGET} PRIVATE
