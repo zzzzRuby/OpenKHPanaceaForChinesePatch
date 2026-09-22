@@ -17,7 +17,7 @@
 * 默认移除了VAG_STREAM相关的hook，不再需要dependencies目录（可以通过开启cmake option的PANACEA_WITH_VAG_STREAM_HOOKS将这个功能增加回来）
 
 ## 注意事项
-* 汉化注入相关部分只支持steam版
+* 汉化注入相关部分只支持steam版和epic学习版，epic版因为我没有所以没有做
 
 ## 关于OpenMovie hook
 * 因为Epic版的日版视频路径跟Steam版的日版不太一样，Epic版会用jp路径，Steam版会用dt路径，为了方便补丁制作所以当检测到运行的是Epic版的时候，会把路径里的jp文件夹全部替换成dt

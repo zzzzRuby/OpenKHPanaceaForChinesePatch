@@ -1,8 +1,12 @@
-#include "kh1_cn_steam_patch.hpp"
 #include "khlauncher_cn_steam_patch.hpp"
+#include "kh1_cn_steam_patch.hpp"
 #include "khtheater_cn_steam_patch.hpp"
+#include "khlauncher_cn_epic_crack_patch.hpp"
+#include "kh1_cn_epic_crack_patch.hpp"
+#include "khtheater_cn_epic_crack_patch.hpp"
 #include <windows.h>
 #include <stdio.h>
+#include "../OpenKH.h"
 
 namespace Shiro {
 
@@ -35,65 +39,71 @@ static int apply_patch(HMODULE module, const PatchEntry* entries, size_t entry_c
     return (applied == entry_count) ? 1 : 0;
 }
 
-static uint8_t g_sys_font_tbl[0x10000] = { 0 };
+static uint8_t sys_font_tbl[0x10000] = { 0 };
 
-PatchEntry g_kh1_cn_steam_patches_in_dll[] = {
-    g_kh1_cn_steam_patch_0,
-    g_kh1_cn_steam_patch_1,
-    g_kh1_cn_steam_patch_2,
-    g_kh1_cn_steam_patch_3,
-    g_kh1_cn_steam_patch_4,
-    g_kh1_cn_steam_patch_5,
-    g_kh1_cn_steam_patch_6,
-    g_kh1_cn_steam_patch_7,
-    g_kh1_cn_steam_patch_8,
-    g_kh1_cn_steam_patch_9,
-    g_kh1_cn_steam_patch_10,
-    g_kh1_cn_steam_patch_11,
-    g_kh1_cn_steam_patch_12,
-    g_kh1_cn_steam_patch_13,
-    g_kh1_cn_steam_patch_14,
-    g_kh1_cn_steam_patch_15,
-    g_kh1_cn_steam_patch_16,
-    g_kh1_cn_steam_patch_17,
-    g_kh1_cn_steam_patch_18,
-    g_kh1_cn_steam_patch_19,
-    g_kh1_cn_steam_patch_20,
-    g_kh1_cn_steam_patch_21,
-    g_kh1_cn_steam_patch_22,
-    g_kh1_cn_steam_patch_23,
-    g_kh1_cn_steam_patch_24,
-    g_kh1_cn_steam_patch_25,
-    g_kh1_cn_steam_patch_26,
-    g_kh1_cn_steam_patch_27,
-    g_kh1_cn_steam_patch_28,
+static int khlauncher_cn_steam_Apply(HMODULE module)
+{
+    constexpr size_t count = sizeof(khlauncher_cn_steam_patches) / sizeof(khlauncher_cn_steam_patches[0]);
+    return apply_patch(module, khlauncher_cn_steam_patches, count, "khlauncher_cn_steam");
+}
+
+static constexpr PatchEntry kh1_cn_steam_patches_in_dll[] = {
+    kh1_cn_steam_entry_0,
+    kh1_cn_steam_entry_1,
+    kh1_cn_steam_entry_2,
+    kh1_cn_steam_entry_3,
+    kh1_cn_steam_entry_4,
+    kh1_cn_steam_entry_5,
+    kh1_cn_steam_entry_6,
+    kh1_cn_steam_entry_7,
+    kh1_cn_steam_entry_8,
+    kh1_cn_steam_entry_9,
+    kh1_cn_steam_entry_10,
+    kh1_cn_steam_entry_11,
+    kh1_cn_steam_entry_12,
+    kh1_cn_steam_entry_13,
+    kh1_cn_steam_entry_14,
+    kh1_cn_steam_entry_15,
+    kh1_cn_steam_entry_16,
+    kh1_cn_steam_entry_17,
+    kh1_cn_steam_entry_18,
+    kh1_cn_steam_entry_19,
+    kh1_cn_steam_entry_20,
+    kh1_cn_steam_entry_21,
+    kh1_cn_steam_entry_22,
+    kh1_cn_steam_entry_23,
+    kh1_cn_steam_entry_24,
+    kh1_cn_steam_entry_25,
+    kh1_cn_steam_entry_26,
+    kh1_cn_steam_entry_27,
+    kh1_cn_steam_entry_28,
     //remove 29
-    g_kh1_cn_steam_patch_30,
-    g_kh1_cn_steam_patch_31,
-    g_kh1_cn_steam_patch_32,
-    g_kh1_cn_steam_patch_33,
-    g_kh1_cn_steam_patch_34,
-    g_kh1_cn_steam_patch_35,
-    g_kh1_cn_steam_patch_36,
-    g_kh1_cn_steam_patch_37,
-    g_kh1_cn_steam_patch_38,
-    g_kh1_cn_steam_patch_39,
-    g_kh1_cn_steam_patch_40,
-    g_kh1_cn_steam_patch_41,
-    g_kh1_cn_steam_patch_42,
-    g_kh1_cn_steam_patch_43,
-    g_kh1_cn_steam_patch_44,
-    g_kh1_cn_steam_patch_45,
+    kh1_cn_steam_entry_30,
+    kh1_cn_steam_entry_31,
+    kh1_cn_steam_entry_32,
+    kh1_cn_steam_entry_33,
+    kh1_cn_steam_entry_34,
+    kh1_cn_steam_entry_35,
+    kh1_cn_steam_entry_36,
+    kh1_cn_steam_entry_37,
+    kh1_cn_steam_entry_38,
+    kh1_cn_steam_entry_39,
+    kh1_cn_steam_entry_40,
+    kh1_cn_steam_entry_41,
+    kh1_cn_steam_entry_42,
+    kh1_cn_steam_entry_43,
+    kh1_cn_steam_entry_44,
+    kh1_cn_steam_entry_45,
 };
 
-int kh1_cn_steam_Apply(HMODULE module)
+static int kh1_cn_steam_Apply(HMODULE module)
 {
-    constexpr size_t count = sizeof(g_kh1_cn_steam_patches_in_dll) / sizeof(g_kh1_cn_steam_patches_in_dll[0]);
-    if (apply_patch(module, g_kh1_cn_steam_patches_in_dll, count, "kh1_cn_steam") == 0) {
+    constexpr size_t count = sizeof(kh1_cn_steam_patches_in_dll) / sizeof(kh1_cn_steam_patches_in_dll[0]);
+    if (apply_patch(module, kh1_cn_steam_patches_in_dll, count, "kh1_cn_steam") == 0) {
         return 0;
     }
 
-    constexpr auto kh1_cn_steam_patch_29_rva = g_kh1_cn_steam_patch_29.rva;
+    constexpr auto kh1_cn_steam_patch_29_rva = kh1_cn_steam_entry_29.rva;
     constexpr uint8_t kh1_cn_steam_orig_29_in_dll[11] = {
         0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00
     };
@@ -102,7 +112,7 @@ int kh1_cn_steam_Apply(HMODULE module)
     
     kh1_cn_steam_patch_29_in_dll[0] = 0x48; // mov rbx, ...
     kh1_cn_steam_patch_29_in_dll[1] = 0xbb; 
-    *(uintptr_t*)(kh1_cn_steam_patch_29_in_dll + 2) = (uintptr_t)g_sys_font_tbl;
+    *(uintptr_t*)(kh1_cn_steam_patch_29_in_dll + 2) = (uintptr_t)sys_font_tbl;
     kh1_cn_steam_patch_29_in_dll[10] = 0xc3; // ret
 
     PatchEntry g_kh1_cn_steam_patch_29_in_dll = { 
@@ -114,44 +124,127 @@ int kh1_cn_steam_Apply(HMODULE module)
     };
 
     return apply_patch(module, &g_kh1_cn_steam_patch_29_in_dll, 1, "kh1_cn_steam") == 0;
+}
 
-    /*
-    constexpr auto kh1_cn_steam_patch_21_rva = g_kh1_cn_steam_patch_21.rva;
-    uint8_t kh1_cn_steam_patch_21_in_dll[8] = { 0 };
-    kh1_cn_steam_patch_21_in_dll[0] = 0x00; //保持原来的字节
+static int khtheater_cn_steam_Apply(HMODULE module)
+{
+    constexpr size_t count = sizeof(khtheater_cn_steam_patches) / sizeof(khtheater_cn_steam_patches[0]);
+    return apply_patch(module, khtheater_cn_steam_patches, count, "khtheater_cn_steam");
+}
 
-    kh1_cn_steam_patch_21_in_dll[1] = 0x48; //lea rbx, [rip + ...]
-    kh1_cn_steam_patch_21_in_dll[2] = 0x8d; 
-    kh1_cn_steam_patch_21_in_dll[3] = 0x1d; 
+static int khlauncher_cn_epic_crack_Apply(HMODULE module)
+{
+    constexpr size_t count = sizeof(khlauncher_cn_epic_crack_patches) / sizeof(khlauncher_cn_epic_crack_patches[0]);
+    return apply_patch(module, khlauncher_cn_epic_crack_patches, count, "khlauncher_cn_epic_crack");
+}
 
-    uintptr_t patch_21_addr = (uintptr_t)module + kh1_cn_steam_patch_21_rva;
-    uintptr_t next_instruction_addr = patch_21_addr + 8;
-    
-    int64_t real_offset = (int64_t)((uintptr_t)g_sys_font_tbl - next_instruction_addr);
+static constexpr PatchEntry kh1_cn_epic_crack_patches_in_dll[] = {
+    kh1_cn_epic_crack_entry_0,
+    kh1_cn_epic_crack_entry_1,
+    kh1_cn_epic_crack_entry_2,
+    kh1_cn_epic_crack_entry_3,
+    kh1_cn_epic_crack_entry_4,
+    kh1_cn_epic_crack_entry_5,
+    kh1_cn_epic_crack_entry_6,
+    kh1_cn_epic_crack_entry_7,
+    kh1_cn_epic_crack_entry_8,
+    kh1_cn_epic_crack_entry_9,
+    kh1_cn_epic_crack_entry_10,
+    kh1_cn_epic_crack_entry_11,
+    kh1_cn_epic_crack_entry_12,
+    kh1_cn_epic_crack_entry_13,
+    kh1_cn_epic_crack_entry_14,
+    kh1_cn_epic_crack_entry_15,
+    kh1_cn_epic_crack_entry_16,
+    kh1_cn_epic_crack_entry_17,
+    kh1_cn_epic_crack_entry_18,
+    kh1_cn_epic_crack_entry_19,
+    kh1_cn_epic_crack_entry_20,
+    kh1_cn_epic_crack_entry_21,
+    kh1_cn_epic_crack_entry_22,
+    kh1_cn_epic_crack_entry_23,
+    kh1_cn_epic_crack_entry_24,
+    kh1_cn_epic_crack_entry_25,
+    kh1_cn_epic_crack_entry_26,
+    kh1_cn_epic_crack_entry_27,
+    kh1_cn_epic_crack_entry_28,
+    //remove 29
+    kh1_cn_epic_crack_entry_30,
+    kh1_cn_epic_crack_entry_31,
+    kh1_cn_epic_crack_entry_32,
+    kh1_cn_epic_crack_entry_33,
+    kh1_cn_epic_crack_entry_34,
+    kh1_cn_epic_crack_entry_35,
+    kh1_cn_epic_crack_entry_36,
+    kh1_cn_epic_crack_entry_37,
+    kh1_cn_epic_crack_entry_38,
+    kh1_cn_epic_crack_entry_39,
+    kh1_cn_epic_crack_entry_40,
+    kh1_cn_epic_crack_entry_41,
+    kh1_cn_epic_crack_entry_42,
+    kh1_cn_epic_crack_entry_43,
+};
 
-    if (real_offset < INT32_MIN || real_offset > INT32_MAX)
-    {
-        printf("[kh1_cn_steam] RIP relative offset overflow! Distance: %lld bytes. Maximum allowed is +-2GB.\n", real_offset);
-        return 0; 
+static int kh1_cn_epic_crack_Apply(HMODULE module)
+{
+    constexpr size_t count = sizeof(kh1_cn_epic_crack_patches_in_dll) / sizeof(kh1_cn_epic_crack_patches_in_dll[0]);
+    if (apply_patch(module, kh1_cn_epic_crack_patches_in_dll, count, "kh1_cn_epic_crack") == 0) {
+        return 0;
     }
 
-    int32_t relative_offset = (int32_t)real_offset;
-    *(int32_t*)(kh1_cn_steam_patch_21_in_dll + 4) = relative_offset;
-    PatchEntry g_kh1_cn_steam_patch_21_in_dll = { kh1_cn_steam_patch_21_rva, kh1_cn_steam_orig_21, kh1_cn_steam_patch_21, sizeof(kh1_cn_steam_patch_29), ".text" };
-    return apply_patch(module, &g_kh1_cn_steam_patch_21_in_dll, 1, "kh1_cn_steam");
-    */
+    constexpr auto kh1_cn_epic_crack_patch_29_rva = kh1_cn_epic_crack_entry_29.rva;
+    constexpr uint8_t kh1_cn_epic_crack_orig_29_in_dll[11] = {
+        0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00
+    };
+
+    uint8_t kh1_cn_epic_crack_patch_29_in_dll[11];
+    
+    kh1_cn_epic_crack_patch_29_in_dll[0] = 0x48; // mov rbx, ...
+    kh1_cn_epic_crack_patch_29_in_dll[1] = 0xbb; 
+    *(uintptr_t*)(kh1_cn_epic_crack_patch_29_in_dll + 2) = (uintptr_t)sys_font_tbl;
+    kh1_cn_epic_crack_patch_29_in_dll[10] = 0xc3; // ret
+
+    PatchEntry g_kh1_cn_epic_crack_patch_29_in_dll = { 
+        kh1_cn_epic_crack_patch_29_rva, 
+        kh1_cn_epic_crack_orig_29_in_dll,
+        kh1_cn_epic_crack_patch_29_in_dll,
+        sizeof(kh1_cn_epic_crack_patch_29_in_dll),
+        ".text(padding)" 
+    };
+
+    return apply_patch(module, &g_kh1_cn_epic_crack_patch_29_in_dll, 1, "kh1_cn_epic_crack") == 0;
 }
 
-int khlauncher_cn_steam_Apply(HMODULE module)
+static int khtheater_cn_epic_crack_Apply(HMODULE module)
 {
-    constexpr size_t count = sizeof(g_khlauncher_cn_steam_patches) / sizeof(g_khlauncher_cn_steam_patches[0]);
-    return apply_patch(module, g_khlauncher_cn_steam_patches, count, "khlauncher_cn_steam");
+    constexpr size_t count = sizeof(khtheater_cn_epic_crack_patches) / sizeof(khtheater_cn_epic_crack_patches[0]);
+    return apply_patch(module, khtheater_cn_epic_crack_patches, count, "khtheater_cn_epic_crack");
 }
 
-int khtheater_cn_steam_Apply(HMODULE module)
+int kh1_cn_Apply(HMODULE module, OpenKH::GameStoreId store)
 {
-    constexpr size_t count = sizeof(g_khtheater_cn_steam_patches) / sizeof(g_khtheater_cn_steam_patches[0]);
-    return apply_patch(module, g_khtheater_cn_steam_patches, count, "khtheater_cn_steam");
+    switch(store) {
+    case OpenKH::GameStoreId::Steam: return kh1_cn_steam_Apply(module);
+    case OpenKH::GameStoreId::Epic: return kh1_cn_epic_crack_Apply(module);
+    default: return 0;
+    }
 }
 
+int khlauncher_cn_Apply(HMODULE module, OpenKH::GameStoreId store)
+{
+    switch(store) {
+    case OpenKH::GameStoreId::Steam: return khlauncher_cn_steam_Apply(module);
+    case OpenKH::GameStoreId::Epic: return khlauncher_cn_epic_crack_Apply(module);
+    default: return 0;
+    }
+}
+
+int khtheater_cn_Apply(HMODULE module, OpenKH::GameStoreId store)
+{
+    switch(store) {
+    case OpenKH::GameStoreId::Steam: return khtheater_cn_steam_Apply(module);
+    case OpenKH::GameStoreId::Epic: return khtheater_cn_epic_crack_Apply(module);
+    default: return 0;
+    }
+}
 }

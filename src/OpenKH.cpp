@@ -140,9 +140,9 @@ static bool IsEpic() noexcept {
 bool OpenKH::m_EnableZhCnInject = true;
 
 namespace Shiro {
-int kh1_cn_steam_Apply(HMODULE module);
-int khlauncher_cn_steam_Apply(HMODULE module);
-int khtheater_cn_steam_Apply(HMODULE module);
+int kh1_cn_Apply(HMODULE module, OpenKH::GameStoreId store);
+int khlauncher_cn_Apply(HMODULE module, OpenKH::GameStoreId store);
+int khtheater_cn_Apply(HMODULE module, OpenKH::GameStoreId store);
 }
 #endif
 
@@ -271,24 +271,20 @@ void OpenKH::Initialize()
     }
     
 #ifdef PANACEA_WITH_CN_INJECT
-        if (m_EnableZhCnInject) {
-            if (IsSteam()) {
-                switch (m_GameID)
-                {
-                case GameId::KingdomHearts1:
-                    Shiro::kh1_cn_steam_Apply(g_hInstance);
-                    break;
-                case GameId::Launcher1_5_2_5:
-                    Shiro::khlauncher_cn_steam_Apply(g_hInstance);
-                    break;
-                case GameId::Theater:
-                    Shiro::khtheater_cn_steam_Apply(g_hInstance);
-                    break;
-                }
-            } else if (IsEpic()) {
-
-            }
+    if (m_EnableZhCnInject) {
+        switch (m_GameID)
+        {
+        case GameId::KingdomHearts1:
+            Shiro::kh1_cn_Apply(g_hInstance, m_GameStoreId);
+            break;
+        case GameId::Launcher1_5_2_5:
+            Shiro::khlauncher_cn_Apply(g_hInstance, m_GameStoreId);
+            break;
+        case GameId::Theater:
+            Shiro::khtheater_cn_Apply(g_hInstance, m_GameStoreId);
+            break;
         }
+    }
 #endif
 
     m_SettingModPath = m_ModPath + L"/setting";
