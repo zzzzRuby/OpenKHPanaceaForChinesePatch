@@ -140,9 +140,9 @@ static bool IsEpic() noexcept {
 bool OpenKH::m_EnableZhCnInject = true;
 
 namespace Shiro {
-bool kh1_cn_Apply(HMODULE module, OpenKH::GameStoreId store);
-bool khlauncher_cn_Apply(HMODULE module, OpenKH::GameStoreId store);
-bool khtheater_cn_Apply(HMODULE module, OpenKH::GameStoreId store);
+bool kh1_cn_Apply(HMODULE module);
+bool khlauncher_cn_Apply(HMODULE module);
+bool khtheater_cn_Apply(HMODULE module);
 }
 #endif
 
@@ -159,7 +159,7 @@ const wchar_t* gamefolders[] = {
 };
 void OpenKH::Initialize()
 {
-    g_hInstance = GetModuleHandle(NULL);
+    g_hInstance = GetModuleHandleW(NULL);
     MODULEINFO moduleInfo;
     GetModuleInformation(GetCurrentProcess(), g_hInstance, &moduleInfo, sizeof(MODULEINFO));
     endAddress = (const char*)g_hInstance + moduleInfo.SizeOfImage;
@@ -275,13 +275,13 @@ void OpenKH::Initialize()
         switch (m_GameID)
         {
         case GameId::KingdomHearts1:
-            Shiro::kh1_cn_Apply(g_hInstance, m_GameStoreId);
+            Shiro::kh1_cn_Apply(g_hInstance);
             break;
         case GameId::Launcher1_5_2_5:
-            Shiro::khlauncher_cn_Apply(g_hInstance, m_GameStoreId);
+            Shiro::khlauncher_cn_Apply(g_hInstance);
             break;
         case GameId::Theater:
-            Shiro::khtheater_cn_Apply(g_hInstance, m_GameStoreId);
+            Shiro::khtheater_cn_Apply(g_hInstance);
             break;
         }
     }

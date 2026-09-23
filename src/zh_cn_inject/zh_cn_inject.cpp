@@ -6,13 +6,56 @@
 #include "khtheater_cn_epic_crack_patch.hpp"
 #include <windows.h>
 #include <stdio.h>
+#include <vector>
+#include <array>
+#include <optional>
 #include "../OpenKH.h"
+#include "kh1_text.hpp"
 
 namespace Shiro {
 
-bool kh1_text_apply(HMODULE module, OpenKH::GameStoreId store);
+bool calc_module_sha512(HMODULE module, std::array<std::byte, 64>& outHash) noexcept {
+    wchar_t exePath[MAX_PATH];
+    if (GetModuleFileNameW(module, exePath, MAX_PATH) == 0) {
+        return false;
+    }
 
-static bool apply_patch(HMODULE module, const PatchEntry* entries, size_t entry_count, const char* patch_name) {
+    HANDLE hFile = CreateFileW(exePath, GENERIC_READ, FILE_SHARE_READ, NULL, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL);
+    if (hFile == INVALID_HANDLE_VALUE) return false;
+
+    HCRYPTPROV hProv = 0;
+    HCRYPTHASH hHash = 0;
+    bool success = false;
+
+    if (CryptAcquireContextW(&hProv, NULL, NULL, PROV_RSA_AES, CRYPT_VERIFYCONTEXT)) {
+        if (CryptCreateHash(hProv, CALG_SHA_512, 0, 0, &hHash)) {
+            std::vector<BYTE> buffer(65536);
+            DWORD bytesRead = 0;
+
+            success = true;
+            while (ReadFile(hFile, buffer.data(), static_cast<DWORD>(buffer.size()), &bytesRead, NULL) && bytesRead > 0) {
+                if (!CryptHashData(hHash, buffer.data(), bytesRead, 0)) {
+                    success = false;
+                    break;
+                }
+            }
+
+            if (success) {
+                DWORD hashLen = static_cast<DWORD>(outHash.size());
+                if (!CryptGetHashParam(hHash, HP_HASHVAL, (BYTE*)outHash.data(), &hashLen, 0)) {
+                    success = false;
+                }
+            }
+            CryptDestroyHash(hHash);
+        }
+        CryptReleaseContext(hProv, 0);
+    }
+
+    CloseHandle(hFile);
+    return success;
+}
+
+static bool apply_patch(HMODULE module, const PatchEntry* entries, size_t entry_count, const char* patch_name) noexcept {
     unsigned char *base = (unsigned char *)module;
     size_t applied = 0;
     for (size_t i = 0; i < entry_count; i++) {
@@ -41,10 +84,77 @@ static bool apply_patch(HMODULE module, const PatchEntry* entries, size_t entry_
     return applied == entry_count;
 }
 
+static bool kh1_text_apply(HMODULE module, const KH1S_StringPatch* patches) noexcept {
+    const uintptr_t actualBase = (uintptr_t)module;
+
+    uint32_t successes = 0;
+    uint32_t failures = 0;
+    uint32_t skipped = 0;
+
+    for (int i = 0; i < KH1S_NUM_ENTRIES; ++i) {
+        const KH1S_StringPatch* p = &patches[i];
+
+        if (p->targetPtrRva == 0 || p->data == NULL) {
+            ++skipped;
+            continue;
+        }
+
+        void* newString = (void*)p->data;
+
+        size_t length = p->length;
+
+        void* targetSlot = (void*)(actualBase + p->targetPtrRva);
+
+        DWORD oldProtect = 0;
+        if (!VirtualProtect(targetSlot, 16, PAGE_READWRITE, &oldProtect)) {
+            ++failures;
+            continue;
+        }
+
+        *(void**)targetSlot = newString;
+
+        uint64_t* lengthSlot = (uint64_t*)((uint8_t*)targetSlot + 8);
+        uint64_t oldLengthQword = *lengthSlot;
+        uint64_t newLengthQword = (oldLengthQword & 0xffffffff00000000ULL) | (length & 0xffffffffULL);
+        *lengthSlot = newLengthQword;
+
+        DWORD ignored = 0;
+        VirtualProtect(targetSlot, 16, oldProtect, &ignored);
+
+        ++successes;
+    }
+
+    printf("KH1FM string patch applied. Base: 0x%llx Success: %u Failed: %u Skipped: %u\n", (unsigned long long)actualBase, successes, failures, skipped);
+
+    return failures == 0;
+}
+
 static uint8_t sys_font_tbl[0x10000] = { 0 };
 
-static bool khlauncher_cn_steam_Apply(HMODULE module)
-{
+static bool apply_kh1_sys_font_tbl(HMODULE module, uintptr_t rva, const char* sect, const char* name) noexcept {
+    constexpr uint8_t orig[11] = {
+        0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00
+    };
+
+    uint8_t patch[11];
+    
+    patch[0] = 0x48; // mov rbx, ...
+    patch[1] = 0xbb; 
+    *(uintptr_t*)(patch + 2) = (uintptr_t)sys_font_tbl;
+    patch[10] = 0xc3; // ret
+
+    const PatchEntry entry = { 
+        rva, 
+        orig,
+        patch,
+        sizeof(patch),
+        sect,
+    };
+
+    return apply_patch(module, &entry, 1, name);
+} 
+
+static bool khlauncher_cn_steam_Apply(HMODULE module) noexcept {
     constexpr size_t count = sizeof(khlauncher_cn_steam_patches) / sizeof(khlauncher_cn_steam_patches[0]);
     return apply_patch(module, khlauncher_cn_steam_patches, count, "khlauncher_cn_steam");
 }
@@ -98,44 +208,21 @@ static constexpr PatchEntry kh1_cn_steam_patches_in_dll[] = {
     kh1_cn_steam_entry_45,
 };
 
-static bool kh1_cn_steam_Apply(HMODULE module)
-{
+static bool kh1_cn_steam_Apply(HMODULE module) noexcept {
     constexpr size_t count = sizeof(kh1_cn_steam_patches_in_dll) / sizeof(kh1_cn_steam_patches_in_dll[0]);
     if (!apply_patch(module, kh1_cn_steam_patches_in_dll, count, "kh1_cn_steam")) {
         return false;
     }
 
-    constexpr auto kh1_cn_steam_patch_29_rva = kh1_cn_steam_entry_29.rva;
-    constexpr uint8_t kh1_cn_steam_orig_29_in_dll[11] = {
-        0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00
-    };
-
-    uint8_t kh1_cn_steam_patch_29_in_dll[11];
-    
-    kh1_cn_steam_patch_29_in_dll[0] = 0x48; // mov rbx, ...
-    kh1_cn_steam_patch_29_in_dll[1] = 0xbb; 
-    *(uintptr_t*)(kh1_cn_steam_patch_29_in_dll + 2) = (uintptr_t)sys_font_tbl;
-    kh1_cn_steam_patch_29_in_dll[10] = 0xc3; // ret
-
-    PatchEntry g_kh1_cn_steam_patch_29_in_dll = { 
-        kh1_cn_steam_patch_29_rva, 
-        kh1_cn_steam_orig_29_in_dll,
-        kh1_cn_steam_patch_29_in_dll,
-        sizeof(kh1_cn_steam_patch_29_in_dll),
-        ".text(padding)" 
-    };
-
-    return apply_patch(module, &g_kh1_cn_steam_patch_29_in_dll, 1, "kh1_cn_steam");
+    return apply_kh1_sys_font_tbl(module, kh1_cn_steam_entry_29.rva, kh1_cn_steam_entry_29.sect, "kh1_cn_steam");
 }
 
-static bool khtheater_cn_steam_Apply(HMODULE module)
-{
+static bool khtheater_cn_steam_Apply(HMODULE module) noexcept {
     constexpr size_t count = sizeof(khtheater_cn_steam_patches) / sizeof(khtheater_cn_steam_patches[0]);
     return apply_patch(module, khtheater_cn_steam_patches, count, "khtheater_cn_steam");
 }
 
-static bool khlauncher_cn_epic_crack_Apply(HMODULE module)
-{
+static bool khlauncher_cn_epic_crack_Apply(HMODULE module) noexcept {
     constexpr size_t count = sizeof(khlauncher_cn_epic_crack_patches) / sizeof(khlauncher_cn_epic_crack_patches[0]);
     return apply_patch(module, khlauncher_cn_epic_crack_patches, count, "khlauncher_cn_epic_crack");
 }
@@ -187,73 +274,95 @@ static constexpr PatchEntry kh1_cn_epic_crack_patches_in_dll[] = {
     kh1_cn_epic_crack_entry_43,
 };
 
-static bool kh1_cn_epic_crack_Apply(HMODULE module)
-{
+static bool kh1_cn_epic_crack_Apply(HMODULE module) noexcept {
     constexpr size_t count = sizeof(kh1_cn_epic_crack_patches_in_dll) / sizeof(kh1_cn_epic_crack_patches_in_dll[0]);
     if (!apply_patch(module, kh1_cn_epic_crack_patches_in_dll, count, "kh1_cn_epic_crack")) {
         return false;
     }
 
-    constexpr auto kh1_cn_epic_crack_patch_29_rva = kh1_cn_epic_crack_entry_29.rva;
-    constexpr uint8_t kh1_cn_epic_crack_orig_29_in_dll[11] = {
-        0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00
-    };
-
-    uint8_t kh1_cn_epic_crack_patch_29_in_dll[11];
-    
-    kh1_cn_epic_crack_patch_29_in_dll[0] = 0x48; // mov rbx, ...
-    kh1_cn_epic_crack_patch_29_in_dll[1] = 0xbb; 
-    *(uintptr_t*)(kh1_cn_epic_crack_patch_29_in_dll + 2) = (uintptr_t)sys_font_tbl;
-    kh1_cn_epic_crack_patch_29_in_dll[10] = 0xc3; // ret
-
-    PatchEntry g_kh1_cn_epic_crack_patch_29_in_dll = { 
-        kh1_cn_epic_crack_patch_29_rva, 
-        kh1_cn_epic_crack_orig_29_in_dll,
-        kh1_cn_epic_crack_patch_29_in_dll,
-        sizeof(kh1_cn_epic_crack_patch_29_in_dll),
-        ".text(padding)" 
-    };
-
-    return apply_patch(module, &g_kh1_cn_epic_crack_patch_29_in_dll, 1, "kh1_cn_epic_crack");
+    return apply_kh1_sys_font_tbl(module, kh1_cn_epic_crack_entry_29.rva, kh1_cn_epic_crack_entry_29.sect, "kh1_cn_epic_crack");
 }
 
-static bool khtheater_cn_epic_crack_Apply(HMODULE module)
-{
+static bool khtheater_cn_epic_crack_Apply(HMODULE module) noexcept {
     constexpr size_t count = sizeof(khtheater_cn_epic_crack_patches) / sizeof(khtheater_cn_epic_crack_patches[0]);
     return apply_patch(module, khtheater_cn_epic_crack_patches, count, "khtheater_cn_epic_crack");
 }
 
-bool kh1_cn_Apply(HMODULE module, OpenKH::GameStoreId store)
+enum class ExeVersion {
+    Steam,
+    EpicCrack,
+};
+
+#define SHIRO_DETECT_VERSION_IMPL(game)                                                             \
+static std::optional<ExeVersion> game ## _detect_version(HMODULE module) noexcept {                 \
+    std::array<std::byte, 64> currentHash{};                                                        \
+    if (!calc_module_sha512(module, currentHash)) {                                                 \
+        return std::nullopt;                                                                        \
+    }                                                                                               \
+    if (memcmp(game ## _cn_steam_sha512, currentHash.data(), currentHash.size()) == 0) {            \
+        return ExeVersion::Steam;                                                                   \
+    }                                                                                               \
+    if (memcmp(game ## _cn_epic_crack_sha512, currentHash.data(), currentHash.size()) == 0) {       \
+        return ExeVersion::EpicCrack;                                                               \
+    }                                                                                               \
+    return std::nullopt;                                                                            \
+}
+
+#define SHIRO_CHECK_VERSION(game, version, module)                                                  \
+const auto ______ ## version ## _opt = game ## _detect_version(module);                             \
+if (!______ ## version ## _opt.has_value()) {                                                       \
+    return false;                                                                                   \
+}                                                                                                   \
+const auto version = ______ ## version ## _opt.value();                                             \
+
+SHIRO_DETECT_VERSION_IMPL(kh1);
+SHIRO_DETECT_VERSION_IMPL(khlauncher);
+SHIRO_DETECT_VERSION_IMPL(khtheater);
+
+bool kh1_cn_Apply(HMODULE module)
 {
-    bool result = false;
-    switch(store) {
-    case OpenKH::GameStoreId::Steam: result = kh1_cn_steam_Apply(module); break;
-    case OpenKH::GameStoreId::Epic: result = kh1_cn_epic_crack_Apply(module); break;
-    default: break;
+    SHIRO_CHECK_VERSION(kh1, version, module);
+
+    const KH1S_StringPatch* kh1s;
+    switch(version) {
+    case ExeVersion::EpicCrack: kh1s = KH1S_PATCH_TABLE_epic_crack; break;
+    case ExeVersion::Steam: kh1s = KH1S_PATCH_TABLE_steam; break;
+    default: std::unreachable();
+    }
+
+    bool result;
+    switch(version) {
+    case ExeVersion::Steam: result = kh1_cn_steam_Apply(module); break;
+    case ExeVersion::EpicCrack: result = kh1_cn_epic_crack_Apply(module); break;
+    default: std::unreachable();
     }
 
     if (!result) {
         return false;
     }
 
-    return kh1_text_apply(module, store);
+    return kh1_text_apply(module, kh1s);
 }
 
-bool khlauncher_cn_Apply(HMODULE module, OpenKH::GameStoreId store)
+bool khlauncher_cn_Apply(HMODULE module)
 {
-    switch(store) {
-    case OpenKH::GameStoreId::Steam: return khlauncher_cn_steam_Apply(module);
-    case OpenKH::GameStoreId::Epic: return khlauncher_cn_epic_crack_Apply(module);
-    default: return false;
+    SHIRO_CHECK_VERSION(khlauncher, version, module);
+
+    switch(version) {
+    case ExeVersion::Steam: return khlauncher_cn_steam_Apply(module);
+    case ExeVersion::EpicCrack: return khlauncher_cn_epic_crack_Apply(module);
+    default: std::unreachable();
     }
 }
 
-bool khtheater_cn_Apply(HMODULE module, OpenKH::GameStoreId store)
+bool khtheater_cn_Apply(HMODULE module)
 {
-    switch(store) {
-    case OpenKH::GameStoreId::Steam: return khtheater_cn_steam_Apply(module);
-    case OpenKH::GameStoreId::Epic: return khtheater_cn_epic_crack_Apply(module);
-    default: return false;
+    SHIRO_CHECK_VERSION(khtheater, version, module);
+
+    switch(version) {
+    case ExeVersion::Steam: return khtheater_cn_steam_Apply(module);
+    case ExeVersion::EpicCrack: return khtheater_cn_epic_crack_Apply(module);
+    default: std::unreachable();
     }
 }
 }

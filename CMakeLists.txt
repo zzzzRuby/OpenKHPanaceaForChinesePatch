@@ -5,7 +5,7 @@ project(OpenKhResearchPanacea LANGUAGES C CXX)
 option(PANACEA_WITH_VAG_STREAM_HOOKS "Build panacea with VAG_STREAM hooks" OFF)
 
 set(CMAKE_CONFIGURATION_TYPES Debug Release CACHE STRING "" FORCE)
-set(CMAKE_CXX_STANDARD 20)
+set(CMAKE_CXX_STANDARD 23)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 set(CMAKE_C_STANDARD 17)
@@ -31,7 +31,6 @@ set(PANACEA_SOURCES
 
 set(ZH_CN_INJECT_SOURCES
 	src/zh_cn_inject/zh_cn_inject.cpp
-	src/zh_cn_inject/kh1_text.cpp
 )
 
 function(panacea_dll TARGET)
