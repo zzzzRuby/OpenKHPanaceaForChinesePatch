@@ -31,6 +31,7 @@ set(PANACEA_SOURCES
 
 set(ZH_CN_INJECT_SOURCES
 	src/zh_cn_inject/zh_cn_inject.cpp
+	src/zh_cn_inject/kh1_text.cpp
 )
 
 function(panacea_dll TARGET)

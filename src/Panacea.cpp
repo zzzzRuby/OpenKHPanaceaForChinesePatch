@@ -253,8 +253,10 @@ Hook<PFN_Bbs_CRsrcData_loadCallback>* Hook_CRsrcData_loadCallback;
 Hook<PFN_OpenMovie>* Hook_OpenMovie;
 
 std::vector<void(*)()> framefuncs;
+#ifdef PANACEA_WITH_VAG_STREAM_HOOKS
 int bassinit;
 int basschan;
+#endif
 
 void LoadDLLs(const std::wstring& folder)
 {

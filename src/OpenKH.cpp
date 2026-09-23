@@ -140,9 +140,9 @@ static bool IsEpic() noexcept {
 bool OpenKH::m_EnableZhCnInject = true;
 
 namespace Shiro {
-int kh1_cn_Apply(HMODULE module, OpenKH::GameStoreId store);
-int khlauncher_cn_Apply(HMODULE module, OpenKH::GameStoreId store);
-int khtheater_cn_Apply(HMODULE module, OpenKH::GameStoreId store);
+bool kh1_cn_Apply(HMODULE module, OpenKH::GameStoreId store);
+bool khlauncher_cn_Apply(HMODULE module, OpenKH::GameStoreId store);
+bool khtheater_cn_Apply(HMODULE module, OpenKH::GameStoreId store);
 }
 #endif
 

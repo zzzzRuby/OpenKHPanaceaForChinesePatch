@@ -10,7 +10,9 @@
 
 namespace Shiro {
 
-static int apply_patch(HMODULE module, const PatchEntry* entries, size_t entry_count, const char* patch_name) {
+bool kh1_text_apply(HMODULE module, OpenKH::GameStoreId store);
+
+static bool apply_patch(HMODULE module, const PatchEntry* entries, size_t entry_count, const char* patch_name) {
     unsigned char *base = (unsigned char *)module;
     size_t applied = 0;
     for (size_t i = 0; i < entry_count; i++) {
@@ -36,12 +38,12 @@ static int apply_patch(HMODULE module, const PatchEntry* entries, size_t entry_c
         VirtualProtect(addr, p->len, oldProtect, &dummy);
         applied++;
     }
-    return (applied == entry_count) ? 1 : 0;
+    return applied == entry_count;
 }
 
 static uint8_t sys_font_tbl[0x10000] = { 0 };
 
-static int khlauncher_cn_steam_Apply(HMODULE module)
+static bool khlauncher_cn_steam_Apply(HMODULE module)
 {
     constexpr size_t count = sizeof(khlauncher_cn_steam_patches) / sizeof(khlauncher_cn_steam_patches[0]);
     return apply_patch(module, khlauncher_cn_steam_patches, count, "khlauncher_cn_steam");
@@ -96,11 +98,11 @@ static constexpr PatchEntry kh1_cn_steam_patches_in_dll[] = {
     kh1_cn_steam_entry_45,
 };
 
-static int kh1_cn_steam_Apply(HMODULE module)
+static bool kh1_cn_steam_Apply(HMODULE module)
 {
     constexpr size_t count = sizeof(kh1_cn_steam_patches_in_dll) / sizeof(kh1_cn_steam_patches_in_dll[0]);
-    if (apply_patch(module, kh1_cn_steam_patches_in_dll, count, "kh1_cn_steam") == 0) {
-        return 0;
+    if (!apply_patch(module, kh1_cn_steam_patches_in_dll, count, "kh1_cn_steam")) {
+        return false;
     }
 
     constexpr auto kh1_cn_steam_patch_29_rva = kh1_cn_steam_entry_29.rva;
@@ -123,16 +125,16 @@ static int kh1_cn_steam_Apply(HMODULE module)
         ".text(padding)" 
     };
 
-    return apply_patch(module, &g_kh1_cn_steam_patch_29_in_dll, 1, "kh1_cn_steam") == 0;
+    return apply_patch(module, &g_kh1_cn_steam_patch_29_in_dll, 1, "kh1_cn_steam");
 }
 
-static int khtheater_cn_steam_Apply(HMODULE module)
+static bool khtheater_cn_steam_Apply(HMODULE module)
 {
     constexpr size_t count = sizeof(khtheater_cn_steam_patches) / sizeof(khtheater_cn_steam_patches[0]);
     return apply_patch(module, khtheater_cn_steam_patches, count, "khtheater_cn_steam");
 }
 
-static int khlauncher_cn_epic_crack_Apply(HMODULE module)
+static bool khlauncher_cn_epic_crack_Apply(HMODULE module)
 {
     constexpr size_t count = sizeof(khlauncher_cn_epic_crack_patches) / sizeof(khlauncher_cn_epic_crack_patches[0]);
     return apply_patch(module, khlauncher_cn_epic_crack_patches, count, "khlauncher_cn_epic_crack");
@@ -185,11 +187,11 @@ static constexpr PatchEntry kh1_cn_epic_crack_patches_in_dll[] = {
     kh1_cn_epic_crack_entry_43,
 };
 
-static int kh1_cn_epic_crack_Apply(HMODULE module)
+static bool kh1_cn_epic_crack_Apply(HMODULE module)
 {
     constexpr size_t count = sizeof(kh1_cn_epic_crack_patches_in_dll) / sizeof(kh1_cn_epic_crack_patches_in_dll[0]);
-    if (apply_patch(module, kh1_cn_epic_crack_patches_in_dll, count, "kh1_cn_epic_crack") == 0) {
-        return 0;
+    if (!apply_patch(module, kh1_cn_epic_crack_patches_in_dll, count, "kh1_cn_epic_crack")) {
+        return false;
     }
 
     constexpr auto kh1_cn_epic_crack_patch_29_rva = kh1_cn_epic_crack_entry_29.rva;
@@ -212,39 +214,46 @@ static int kh1_cn_epic_crack_Apply(HMODULE module)
         ".text(padding)" 
     };
 
-    return apply_patch(module, &g_kh1_cn_epic_crack_patch_29_in_dll, 1, "kh1_cn_epic_crack") == 0;
+    return apply_patch(module, &g_kh1_cn_epic_crack_patch_29_in_dll, 1, "kh1_cn_epic_crack");
 }
 
-static int khtheater_cn_epic_crack_Apply(HMODULE module)
+static bool khtheater_cn_epic_crack_Apply(HMODULE module)
 {
     constexpr size_t count = sizeof(khtheater_cn_epic_crack_patches) / sizeof(khtheater_cn_epic_crack_patches[0]);
     return apply_patch(module, khtheater_cn_epic_crack_patches, count, "khtheater_cn_epic_crack");
 }
 
-int kh1_cn_Apply(HMODULE module, OpenKH::GameStoreId store)
+bool kh1_cn_Apply(HMODULE module, OpenKH::GameStoreId store)
 {
+    bool result = false;
     switch(store) {
-    case OpenKH::GameStoreId::Steam: return kh1_cn_steam_Apply(module);
-    case OpenKH::GameStoreId::Epic: return kh1_cn_epic_crack_Apply(module);
-    default: return 0;
+    case OpenKH::GameStoreId::Steam: result = kh1_cn_steam_Apply(module); break;
+    case OpenKH::GameStoreId::Epic: result = kh1_cn_epic_crack_Apply(module); break;
+    default: break;
     }
+
+    if (!result) {
+        return false;
+    }
+
+    return kh1_text_apply(module, store);
 }
 
-int khlauncher_cn_Apply(HMODULE module, OpenKH::GameStoreId store)
+bool khlauncher_cn_Apply(HMODULE module, OpenKH::GameStoreId store)
 {
     switch(store) {
     case OpenKH::GameStoreId::Steam: return khlauncher_cn_steam_Apply(module);
     case OpenKH::GameStoreId::Epic: return khlauncher_cn_epic_crack_Apply(module);
-    default: return 0;
+    default: return false;
     }
 }
 
-int khtheater_cn_Apply(HMODULE module, OpenKH::GameStoreId store)
+bool khtheater_cn_Apply(HMODULE module, OpenKH::GameStoreId store)
 {
     switch(store) {
     case OpenKH::GameStoreId::Steam: return khtheater_cn_steam_Apply(module);
     case OpenKH::GameStoreId::Epic: return khtheater_cn_epic_crack_Apply(module);
-    default: return 0;
+    default: return false;
     }
 }
 }
