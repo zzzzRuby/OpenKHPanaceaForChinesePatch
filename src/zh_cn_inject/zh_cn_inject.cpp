@@ -9,6 +9,7 @@
 #include <vector>
 #include <array>
 #include <optional>
+#include <Shlwapi.h>
 #include "../OpenKH.h"
 #include "kh1_text.hpp"
 
@@ -308,7 +309,7 @@ static std::optional<ExeVersion> game ## _detect_version(HMODULE module) noexcep
     return std::nullopt;                                                                            \
 }
 
-#define SHIRO_CHECK_VERSION(game, version, module)                                                  \
+#define SHIRO_DETECT_VERSION(game, version, module)                                                  \
 const auto ______ ## version ## _opt = game ## _detect_version(module);                             \
 if (!______ ## version ## _opt.has_value()) {                                                       \
     return false;                                                                                   \
@@ -319,14 +320,21 @@ SHIRO_DETECT_VERSION_IMPL(kh1);
 SHIRO_DETECT_VERSION_IMPL(khlauncher);
 SHIRO_DETECT_VERSION_IMPL(khtheater);
 
-bool kh1_cn_Apply(HMODULE module)
-{
-    SHIRO_CHECK_VERSION(kh1, version, module);
+static bool check_shiro_info(std::wstring_view mod_path) {
+    std::wstring shiro_info = std::wstring(mod_path).append(L"\\shiro.info");
+    return PathFileExistsW(shiro_info.c_str());
+}
+
+bool kh1_cn_Apply(HMODULE module, std::wstring_view mod_path) noexcept {
+    if (!check_shiro_info(mod_path)) {
+        return true;
+    }
+    SHIRO_DETECT_VERSION(kh1, version, module);
 
     const KH1S_StringPatch* kh1s;
     switch(version) {
-    case ExeVersion::EpicCrack: kh1s = KH1S_PATCH_TABLE_epic_crack; break;
     case ExeVersion::Steam: kh1s = KH1S_PATCH_TABLE_steam; break;
+    case ExeVersion::EpicCrack: kh1s = KH1S_PATCH_TABLE_epic_crack; break;
     default: std::unreachable();
     }
 
@@ -344,9 +352,11 @@ bool kh1_cn_Apply(HMODULE module)
     return kh1_text_apply(module, kh1s);
 }
 
-bool khlauncher_cn_Apply(HMODULE module)
-{
-    SHIRO_CHECK_VERSION(khlauncher, version, module);
+bool khlauncher_cn_Apply(HMODULE module, std::wstring_view mod_path) noexcept {
+    if (!check_shiro_info(mod_path)) {
+        return true;
+    }
+    SHIRO_DETECT_VERSION(khlauncher, version, module);
 
     switch(version) {
     case ExeVersion::Steam: return khlauncher_cn_steam_Apply(module);
@@ -355,9 +365,11 @@ bool khlauncher_cn_Apply(HMODULE module)
     }
 }
 
-bool khtheater_cn_Apply(HMODULE module)
-{
-    SHIRO_CHECK_VERSION(khtheater, version, module);
+bool khtheater_cn_Apply(HMODULE module, std::wstring_view mod_path) noexcept {
+    if (!check_shiro_info(mod_path)) {
+        return true;
+    }
+    SHIRO_DETECT_VERSION(khtheater, version, module);
 
     switch(version) {
     case ExeVersion::Steam: return khtheater_cn_steam_Apply(module);

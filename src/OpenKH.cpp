@@ -137,12 +137,10 @@ static bool IsEpic() noexcept {
 }
 
 #ifdef PANACEA_WITH_CN_INJECT
-bool OpenKH::m_EnableZhCnInject = true;
-
 namespace Shiro {
-bool kh1_cn_Apply(HMODULE module);
-bool khlauncher_cn_Apply(HMODULE module);
-bool khtheater_cn_Apply(HMODULE module);
+bool kh1_cn_Apply(HMODULE module, std::wstring_view mod_path) noexcept;
+bool khlauncher_cn_Apply(HMODULE module, std::wstring_view mod_path) noexcept;
+bool khtheater_cn_Apply(HMODULE module, std::wstring_view mod_path) noexcept;
 }
 #endif
 
@@ -270,23 +268,6 @@ void OpenKH::Initialize()
         break;
     }
     
-#ifdef PANACEA_WITH_CN_INJECT
-    if (m_EnableZhCnInject) {
-        switch (m_GameID)
-        {
-        case GameId::KingdomHearts1:
-            Shiro::kh1_cn_Apply(g_hInstance);
-            break;
-        case GameId::Launcher1_5_2_5:
-            Shiro::khlauncher_cn_Apply(g_hInstance);
-            break;
-        case GameId::Theater:
-            Shiro::khtheater_cn_Apply(g_hInstance);
-            break;
-        }
-    }
-#endif
-
     m_SettingModPath = m_ModPath + L"/setting";
     m_ModPath.append(gamefolders[(int)m_GameID]);
     if (m_DevPath.size() > 0)
@@ -294,6 +275,27 @@ void OpenKH::Initialize()
     if (m_ExtractPath.size() > 0)
         m_ExtractPath.append(gamefolders[(int)m_GameID]);
     
+#ifdef PANACEA_WITH_CN_INJECT
+    switch (m_GameID)
+    {
+    case GameId::KingdomHearts1:
+        if (!Shiro::kh1_cn_Apply(g_hInstance, m_ModPath)) {
+            printf("Inject kh1 cn code failed.\n");
+        }
+        break;
+    case GameId::Launcher1_5_2_5:
+        if (!Shiro::khlauncher_cn_Apply(g_hInstance, m_ModPath)) {
+            printf("Inject kh1 cn code failed.\n");
+        }
+        break;
+    case GameId::Theater:
+        if (!Shiro::khtheater_cn_Apply(g_hInstance, m_ModPath)) {
+            printf("Inject kh1 cn code failed.\n");
+        }
+        break;
+    }
+#endif
+
     Hook();
     Panacea::Initialize();
     
@@ -353,10 +355,6 @@ void OpenKH::ReadSettings(const char* filename)
             parseBool(value, m_EnableCache);
         else if (!strncmp(key, "sound_debug", sizeof(buf)))
             parseBool(value, m_SoundDebug);
-#ifdef PANACEA_WITH_CN_INJECT
-        else if (!strncmp(key, "zh_cn_inject", sizeof(buf)))
-            parseBool(value, m_EnableZhCnInject);
-#endif
         else if (!strncmp(key, "quick_launch", sizeof(buf)))
         {
             if (!_stricmp(value, "kh1") || !_stricmp(value, "kh3d"))

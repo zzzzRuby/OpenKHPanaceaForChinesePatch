@@ -33,9 +33,6 @@ namespace OpenKH
     extern bool m_DebugLog;
     extern bool m_EnableCache;
     extern bool m_SoundDebug;
-#ifdef PANACEA_WITH_CN_INJECT
-    extern bool m_EnableZhCnInject;
-#endif
 
     void Initialize();
 
