@@ -130,11 +130,6 @@ static bool kh1_text_apply(HMODULE module, const KH1S_StringPatch* patches) noex
 }
 
 static const uint8_t zeros[STUB_SIZE] = {0};
-static uint8_t kh1_fucked_embedded_item_shop_message[0x2000] = { 0 }; //size = 8192
-static uint8_t kh1_fucked_embedded_phil_cup[0x1000] = { 0 };          // size = 4096
-static uint8_t kh1_fucked_embedded_pegasus_cup[0x1000] = { 0 };       // size = 4096
-static uint8_t kh1_fucked_embedded_hercules_cup[0x1000] = { 0 };      // size = 4096
-static uint8_t kh1_fucked_embedded_hades_cup[0x1000] = { 0 };         // size = 4096
 
 static bool kh1_fucking_embedded_res(HMODULE module, void* var, const DataRef* refs, size_t refCount, uintptr_t stub_rva, const char* name) {
     uint8_t* base = (uint8_t*)module;
@@ -234,25 +229,6 @@ static BOOL read_mod_file(
     return (bSuccess && (totalBytesRead == fileSize));
 }
 
-static bool kh1_read_embedded_files(std::wstring_view mod_path) {
-    if (!read_mod_file(mod_path, L"item_shop_message.bin", kh1_fucked_embedded_item_shop_message, sizeof(kh1_fucked_embedded_item_shop_message))) {
-        return false;
-    }
-    if (!read_mod_file(mod_path, L"exchange\\FM_phil_cup.bin", kh1_fucked_embedded_phil_cup, sizeof(kh1_fucked_embedded_phil_cup))) {
-        return false;
-    }
-    if (!read_mod_file(mod_path, L"exchange\\FM_pegasus_cup.bin", kh1_fucked_embedded_pegasus_cup, sizeof(kh1_fucked_embedded_pegasus_cup))) {
-        return false;
-    }
-    if (!read_mod_file(mod_path, L"exchange\\FM_hercules_cup.bin", kh1_fucked_embedded_hercules_cup, sizeof(kh1_fucked_embedded_hercules_cup))) {
-        return false;
-    }
-    if (!read_mod_file(mod_path, L"exchange\\FM_hades_cup.bin", kh1_fucked_embedded_hades_cup, sizeof(kh1_fucked_embedded_hades_cup))) {
-        return false;
-    }
-    return true;
-}
-
 static uint8_t sys_font_tbl[0x10000] = { 0 };
 
 static bool apply_kh1_sys_font_tbl(HMODULE module, uintptr_t rva, const char* sect, const char* name) noexcept {
@@ -277,6 +253,74 @@ static bool apply_kh1_sys_font_tbl(HMODULE module, uintptr_t rva, const char* se
 
     return apply_patch(module, &entry, 1, name);
 } 
+
+static uint8_t kh1_fucked_embedded_item_shop_message[0x2000] = { 0 }; // size = 8192
+static uint8_t kh1_fucked_embedded_phil_cup[0x1000] = { 0 };          // size = 4096
+static uint8_t kh1_fucked_embedded_pegasus_cup[0x1000] = { 0 };       // size = 4096
+static uint8_t kh1_fucked_embedded_hercules_cup[0x1000] = { 0 };      // size = 4096
+static uint8_t kh1_fucked_embedded_hades_cup[0x1000] = { 0 };         // size = 4096
+
+static bool kh1_read_embedded_files(std::wstring_view mod_path) {
+    if (!read_mod_file(mod_path, L"item_shop_message.bin", kh1_fucked_embedded_item_shop_message, sizeof(kh1_fucked_embedded_item_shop_message))) {
+        return false;
+    }
+    if (!read_mod_file(mod_path, L"exchange\\FM_phil_cup.bin", kh1_fucked_embedded_phil_cup, sizeof(kh1_fucked_embedded_phil_cup))) {
+        return false;
+    }
+    if (!read_mod_file(mod_path, L"exchange\\FM_pegasus_cup.bin", kh1_fucked_embedded_pegasus_cup, sizeof(kh1_fucked_embedded_pegasus_cup))) {
+        return false;
+    }
+    if (!read_mod_file(mod_path, L"exchange\\FM_hercules_cup.bin", kh1_fucked_embedded_hercules_cup, sizeof(kh1_fucked_embedded_hercules_cup))) {
+        return false;
+    }
+    if (!read_mod_file(mod_path, L"exchange\\FM_hades_cup.bin", kh1_fucked_embedded_hades_cup, sizeof(kh1_fucked_embedded_hades_cup))) {
+        return false;
+    }
+    return true;
+}
+
+struct Kh1ResourceConfig {
+    void* var_ptr;
+    const DataRef* refs;
+    size_t ref_count;
+    uintptr_t stub_rva;
+};
+
+static constexpr Kh1ResourceConfig kh1_steam_embedded_files[] = {
+    { &kh1_fucked_embedded_item_shop_message[0], kh1_fucking_embedded_item_shop_message_refs_steam,  _countof(kh1_fucking_embedded_item_shop_message_refs_steam),  KH1_FUCKING_EMBEDDED_ITEM_SHOP_MESSAGE_STUB_RVA_STEAM },
+    { &kh1_fucked_embedded_item_shop_message[4], kh1_fucking_embedded_item_shop_message_refs_steam2, _countof(kh1_fucking_embedded_item_shop_message_refs_steam2), KH1_FUCKING_EMBEDDED_ITEM_SHOP_MESSAGE_STUB_RVA_STEAM2 },
+    { &kh1_fucked_embedded_phil_cup[0],          kh1_fucking_embedded_phil_cup_refs_steam,           _countof(kh1_fucking_embedded_phil_cup_refs_steam),           KH1_FUCKING_EMBEDDED_PHIL_CUP_STUB_RVA_STEAM },
+    { &kh1_fucked_embedded_phil_cup[4],          kh1_fucking_embedded_phil_cup_refs_steam2,          _countof(kh1_fucking_embedded_phil_cup_refs_steam2),          KH1_FUCKING_EMBEDDED_PHIL_CUP_STUB_RVA_STEAM2 },
+    { &kh1_fucked_embedded_pegasus_cup[0],       kh1_fucking_embedded_pegasus_cup_refs_steam,        _countof(kh1_fucking_embedded_pegasus_cup_refs_steam),        KH1_FUCKING_EMBEDDED_PEGASUS_CUP_STUB_RVA_STEAM },
+    { &kh1_fucked_embedded_pegasus_cup[4],       kh1_fucking_embedded_pegasus_cup_refs_steam2,       _countof(kh1_fucking_embedded_pegasus_cup_refs_steam2),       KH1_FUCKING_EMBEDDED_PEGASUS_CUP_STUB_RVA_STEAM2 },
+    { &kh1_fucked_embedded_hercules_cup[0],      kh1_fucking_embedded_hercules_cup_refs_steam,       _countof(kh1_fucking_embedded_hercules_cup_refs_steam),       KH1_FUCKING_EMBEDDED_HERCULES_CUP_STUB_RVA_STEAM },
+    { &kh1_fucked_embedded_hercules_cup[4],      kh1_fucking_embedded_hercules_cup_refs_steam2,      _countof(kh1_fucking_embedded_hercules_cup_refs_steam2),      KH1_FUCKING_EMBEDDED_HERCULES_CUP_STUB_RVA_STEAM2 },
+    { &kh1_fucked_embedded_hades_cup[0],         kh1_fucking_embedded_hades_cup_refs_steam,          _countof(kh1_fucking_embedded_hades_cup_refs_steam),          KH1_FUCKING_EMBEDDED_HADES_CUP_STUB_RVA_STEAM },
+    { &kh1_fucked_embedded_hades_cup[4],         kh1_fucking_embedded_hades_cup_refs_steam2,         _countof(kh1_fucking_embedded_hades_cup_refs_steam2),         KH1_FUCKING_EMBEDDED_HADES_CUP_STUB_RVA_STEAM2 },
+};
+
+static constexpr Kh1ResourceConfig kh1_epic_crack_embedded_files[] = {
+    { &kh1_fucked_embedded_item_shop_message[0], kh1_fucking_embedded_item_shop_message_refs_epic_crack,  _countof(kh1_fucking_embedded_item_shop_message_refs_epic_crack),  KH1_FUCKING_EMBEDDED_ITEM_SHOP_MESSAGE_STUB_RVA_EPIC_CRACK },
+    { &kh1_fucked_embedded_item_shop_message[4], kh1_fucking_embedded_item_shop_message_refs_epic_crack2, _countof(kh1_fucking_embedded_item_shop_message_refs_epic_crack2), KH1_FUCKING_EMBEDDED_ITEM_SHOP_MESSAGE_STUB_RVA_EPIC_CRACK2 },
+    { &kh1_fucked_embedded_phil_cup[0],          kh1_fucking_embedded_phil_cup_refs_epic_crack,           _countof(kh1_fucking_embedded_phil_cup_refs_epic_crack),           KH1_FUCKING_EMBEDDED_PHIL_CUP_STUB_RVA_EPIC_CRACK },
+    { &kh1_fucked_embedded_phil_cup[4],          kh1_fucking_embedded_phil_cup_refs_epic_crack2,          _countof(kh1_fucking_embedded_phil_cup_refs_epic_crack2),          KH1_FUCKING_EMBEDDED_PHIL_CUP_STUB_RVA_EPIC_CRACK2 },
+    { &kh1_fucked_embedded_pegasus_cup[0],       kh1_fucking_embedded_pegasus_cup_refs_epic_crack,        _countof(kh1_fucking_embedded_pegasus_cup_refs_epic_crack),        KH1_FUCKING_EMBEDDED_PEGASUS_CUP_STUB_RVA_EPIC_CRACK },
+    { &kh1_fucked_embedded_pegasus_cup[4],       kh1_fucking_embedded_pegasus_cup_refs_epic_crack2,       _countof(kh1_fucking_embedded_pegasus_cup_refs_epic_crack2),       KH1_FUCKING_EMBEDDED_PEGASUS_CUP_STUB_RVA_EPIC_CRACK2 },
+    { &kh1_fucked_embedded_hercules_cup[0],      kh1_fucking_embedded_hercules_cup_refs_epic_crack,       _countof(kh1_fucking_embedded_hercules_cup_refs_epic_crack),       KH1_FUCKING_EMBEDDED_HERCULES_CUP_STUB_RVA_EPIC_CRACK },
+    { &kh1_fucked_embedded_hercules_cup[4],      kh1_fucking_embedded_hercules_cup_refs_epic_crack2,      _countof(kh1_fucking_embedded_hercules_cup_refs_epic_crack2),      KH1_FUCKING_EMBEDDED_HERCULES_CUP_STUB_RVA_EPIC_CRACK2 },
+    { &kh1_fucked_embedded_hades_cup[0],         kh1_fucking_embedded_hades_cup_refs_epic_crack,          _countof(kh1_fucking_embedded_hades_cup_refs_epic_crack),          KH1_FUCKING_EMBEDDED_HADES_CUP_STUB_RVA_EPIC_CRACK },
+    { &kh1_fucked_embedded_hades_cup[4],         kh1_fucking_embedded_hades_cup_refs_epic_crack2,         _countof(kh1_fucking_embedded_hades_cup_refs_epic_crack2),         KH1_FUCKING_EMBEDDED_HADES_CUP_STUB_RVA_EPIC_CRACK2 },
+};
+
+static bool kh1_apply_embedded_files(HMODULE module, const Kh1ResourceConfig* configs, size_t count, const char* name) noexcept {
+    for (size_t i = 0;i < count;i++) {
+        auto& config = configs[i];
+        if (!kh1_fucking_embedded_res(module, config.var_ptr, config.refs, config.ref_count, config.stub_rva, name)) {
+            return false;
+        }
+    }
+    return true;
+}
 
 static bool khlauncher_cn_steam_Apply(HMODULE module) noexcept {
     return apply_patch(module, khlauncher_cn_steam_patches, _countof(khlauncher_cn_steam_patches), "khlauncher_cn_steam");
@@ -343,78 +387,16 @@ static bool kh1_cn_steam_Apply(HMODULE module, std::wstring_view mod_path) noexc
     if (!kh1_read_embedded_files(mod_path)) {
         return false;
     }
-
-    if (!kh1_fucking_embedded_res(module, &kh1_fucked_embedded_item_shop_message[0], 
-        kh1_fucking_embedded_item_shop_message_refs_steam,
-        _countof(kh1_fucking_embedded_item_shop_message_refs_steam),
-        KH1_FUCKING_EMBEDDED_ITEM_SHOP_MESSAGE_STUB_RVA_STEAM, "kh1_cn_steam")) {
-        return false;
-    }
-
-    if (!kh1_fucking_embedded_res(module, &kh1_fucked_embedded_item_shop_message[4], 
-        kh1_fucking_embedded_item_shop_message_refs_steam2,
-        _countof(kh1_fucking_embedded_item_shop_message_refs_steam2),
-        KH1_FUCKING_EMBEDDED_ITEM_SHOP_MESSAGE_STUB_RVA_STEAM2, "kh1_cn_steam")) {
-        return false;
-    }
-
-    if (!kh1_fucking_embedded_res(module, &kh1_fucked_embedded_phil_cup[0], 
-        kh1_fucking_embedded_phil_cup_refs_steam,
-        _countof(kh1_fucking_embedded_phil_cup_refs_steam),
-        KH1_FUCKING_EMBEDDED_PHIL_CUP_STUB_RVA_STEAM, "kh1_cn_steam")) {
-        return false;
-    }
-
-    if (!kh1_fucking_embedded_res(module, &kh1_fucked_embedded_phil_cup[4], 
-        kh1_fucking_embedded_phil_cup_refs_steam2,
-        _countof(kh1_fucking_embedded_phil_cup_refs_steam2),
-        KH1_FUCKING_EMBEDDED_PHIL_CUP_STUB_RVA_STEAM2, "kh1_cn_steam")) {
-        return false;
-    }
-
-    if (!kh1_fucking_embedded_res(module, &kh1_fucked_embedded_pegasus_cup[0], 
-        kh1_fucking_embedded_pegasus_cup_refs_steam,
-        _countof(kh1_fucking_embedded_pegasus_cup_refs_steam),
-        KH1_FUCKING_EMBEDDED_PEGASUS_CUP_STUB_RVA_STEAM, "kh1_cn_steam")) {
-        return false;
-    }
-
-    if (!kh1_fucking_embedded_res(module, &kh1_fucked_embedded_pegasus_cup[4], 
-        kh1_fucking_embedded_pegasus_cup_refs_steam2,
-        _countof(kh1_fucking_embedded_pegasus_cup_refs_steam2),
-        KH1_FUCKING_EMBEDDED_PEGASUS_CUP_STUB_RVA_STEAM2, "kh1_cn_steam")) {
-        return false;
-    }
-
-    if (!kh1_fucking_embedded_res(module, &kh1_fucked_embedded_hercules_cup[0], 
-        kh1_fucking_embedded_hercules_cup_refs_steam,
-        _countof(kh1_fucking_embedded_hercules_cup_refs_steam),
-        KH1_FUCKING_EMBEDDED_HERCULES_CUP_STUB_RVA_STEAM, "kh1_cn_steam")) {
-        return false;
-    }
-
-    if (!kh1_fucking_embedded_res(module, &kh1_fucked_embedded_hercules_cup[4], 
-        kh1_fucking_embedded_hercules_cup_refs_steam2,
-        _countof(kh1_fucking_embedded_hercules_cup_refs_steam2),
-        KH1_FUCKING_EMBEDDED_HERCULES_CUP_STUB_RVA_STEAM2, "kh1_cn_steam")) {
-        return false;
-    }
-
-    if (!kh1_fucking_embedded_res(module, &kh1_fucked_embedded_hades_cup[0], 
-        kh1_fucking_embedded_hades_cup_refs_steam,
-        _countof(kh1_fucking_embedded_hades_cup_refs_steam),
-        KH1_FUCKING_EMBEDDED_HADES_CUP_STUB_RVA_STEAM, "kh1_cn_steam")) {
-        return false;
-    }
-
-    if (!kh1_fucking_embedded_res(module, &kh1_fucked_embedded_hades_cup[4], 
-        kh1_fucking_embedded_hades_cup_refs_steam2,
-        _countof(kh1_fucking_embedded_hades_cup_refs_steam2),
-        KH1_FUCKING_EMBEDDED_HADES_CUP_STUB_RVA_STEAM2, "kh1_cn_steam")) {
+    
+    if (!kh1_apply_embedded_files(module, kh1_steam_embedded_files, _countof(kh1_steam_embedded_files), "kh1_cn_steam")) {
         return false;
     }
 
     if (!apply_patch(module, kh1_embedded_text_steam, _countof(kh1_embedded_text_steam), "kh1_cn_steam")) {
+        return false;
+    }
+
+    if (!kh1_text_apply(module, KH1S_PATCH_TABLE_steam)) {
         return false;
     }
 
@@ -488,78 +470,16 @@ static bool kh1_cn_epic_crack_Apply(HMODULE module, std::wstring_view mod_path) 
     if (!kh1_read_embedded_files(mod_path)) {
         return false;
     }
-
-    if (!kh1_fucking_embedded_res(module, &kh1_fucked_embedded_item_shop_message[0], 
-        kh1_fucking_embedded_item_shop_message_refs_epic_crack,
-        _countof(kh1_fucking_embedded_item_shop_message_refs_epic_crack),
-        KH1_FUCKING_EMBEDDED_ITEM_SHOP_MESSAGE_STUB_RVA_EPIC_CRACK, "kh1_cn_epic_crack")) {
-        return false;
-    }
-
-    if (!kh1_fucking_embedded_res(module, &kh1_fucked_embedded_item_shop_message[4], 
-        kh1_fucking_embedded_item_shop_message_refs_epic_crack2,
-        _countof(kh1_fucking_embedded_item_shop_message_refs_epic_crack2),
-        KH1_FUCKING_EMBEDDED_ITEM_SHOP_MESSAGE_STUB_RVA_EPIC_CRACK2, "kh1_cn_epic_crack")) {
-        return false;
-    }
-
-    if (!kh1_fucking_embedded_res(module, &kh1_fucked_embedded_phil_cup[0], 
-        kh1_fucking_embedded_phil_cup_refs_epic_crack,
-        _countof(kh1_fucking_embedded_phil_cup_refs_epic_crack),
-        KH1_FUCKING_EMBEDDED_PHIL_CUP_STUB_RVA_EPIC_CRACK, "kh1_cn_epic_crack")) {
-        return false;
-    }
-
-    if (!kh1_fucking_embedded_res(module, &kh1_fucked_embedded_phil_cup[4], 
-        kh1_fucking_embedded_phil_cup_refs_epic_crack2,
-        _countof(kh1_fucking_embedded_phil_cup_refs_epic_crack2),
-        KH1_FUCKING_EMBEDDED_PHIL_CUP_STUB_RVA_EPIC_CRACK2, "kh1_cn_epic_crack")) {
-        return false;
-    }
-
-    if (!kh1_fucking_embedded_res(module, &kh1_fucked_embedded_pegasus_cup[0], 
-        kh1_fucking_embedded_pegasus_cup_refs_epic_crack,
-        _countof(kh1_fucking_embedded_pegasus_cup_refs_epic_crack),
-        KH1_FUCKING_EMBEDDED_PEGASUS_CUP_STUB_RVA_EPIC_CRACK, "kh1_cn_epic_crack")) {
-        return false;
-    }
-
-    if (!kh1_fucking_embedded_res(module, &kh1_fucked_embedded_pegasus_cup[4], 
-        kh1_fucking_embedded_pegasus_cup_refs_epic_crack2,
-        _countof(kh1_fucking_embedded_pegasus_cup_refs_epic_crack2),
-        KH1_FUCKING_EMBEDDED_PEGASUS_CUP_STUB_RVA_EPIC_CRACK2, "kh1_cn_epic_crack")) {
-        return false;
-    }
-
-    if (!kh1_fucking_embedded_res(module, &kh1_fucked_embedded_hercules_cup[0], 
-        kh1_fucking_embedded_hercules_cup_refs_epic_crack,
-        _countof(kh1_fucking_embedded_hercules_cup_refs_epic_crack),
-        KH1_FUCKING_EMBEDDED_HERCULES_CUP_STUB_RVA_EPIC_CRACK, "kh1_cn_epic_crack")) {
-        return false;
-    }
-
-    if (!kh1_fucking_embedded_res(module, &kh1_fucked_embedded_hercules_cup[4], 
-        kh1_fucking_embedded_hercules_cup_refs_epic_crack2,
-        _countof(kh1_fucking_embedded_hercules_cup_refs_epic_crack2),
-        KH1_FUCKING_EMBEDDED_HERCULES_CUP_STUB_RVA_EPIC_CRACK2, "kh1_cn_epic_crack")) {
-        return false;
-    }
-
-    if (!kh1_fucking_embedded_res(module, &kh1_fucked_embedded_hades_cup[0], 
-        kh1_fucking_embedded_hades_cup_refs_epic_crack,
-        _countof(kh1_fucking_embedded_hades_cup_refs_epic_crack),
-        KH1_FUCKING_EMBEDDED_HADES_CUP_STUB_RVA_EPIC_CRACK, "kh1_cn_epic_crack")) {
-        return false;
-    }
-
-    if (!kh1_fucking_embedded_res(module, &kh1_fucked_embedded_hades_cup[4], 
-        kh1_fucking_embedded_hades_cup_refs_epic_crack2,
-        _countof(kh1_fucking_embedded_hades_cup_refs_epic_crack2),
-        KH1_FUCKING_EMBEDDED_HADES_CUP_STUB_RVA_EPIC_CRACK2, "kh1_cn_epic_crack")) {
+    
+    if (!kh1_apply_embedded_files(module, kh1_epic_crack_embedded_files, _countof(kh1_epic_crack_embedded_files), "kh1_cn_epic_crack")) {
         return false;
     }
 
     if (!apply_patch(module, kh1_embedded_text_epic_crack, _countof(kh1_embedded_text_epic_crack), "kh1_cn_epic_crack")) {
+        return false;
+    }
+
+    if (!kh1_text_apply(module, KH1S_PATCH_TABLE_epic_crack)) {
         return false;
     }
 
@@ -595,7 +515,7 @@ const auto ______ ## version ## _opt = game ## _detect_version(module);         
 if (!______ ## version ## _opt.has_value()) {                                                       \
     return false;                                                                                   \
 }                                                                                                   \
-const auto version = ______ ## version ## _opt.value();                                             \
+const auto version = ______ ## version ## _opt.value();
 
 SHIRO_DETECT_VERSION_IMPL(kh1);
 SHIRO_DETECT_VERSION_IMPL(khlauncher);
@@ -612,25 +532,11 @@ bool kh1_cn_Apply(HMODULE module, std::wstring_view mod_path) noexcept {
     }
     SHIRO_DETECT_VERSION(kh1, version, module);
 
-    const KH1S_StringPatch* kh1s;
     switch(version) {
-    case ExeVersion::Steam: kh1s = KH1S_PATCH_TABLE_steam; break;
-    case ExeVersion::EpicCrack: kh1s = KH1S_PATCH_TABLE_epic_crack; break;
+    case ExeVersion::Steam: return kh1_cn_steam_Apply(module, mod_path); break;
+    case ExeVersion::EpicCrack: return kh1_cn_epic_crack_Apply(module, mod_path); break;
     default: std::unreachable();
     }
-
-    bool result;
-    switch(version) {
-    case ExeVersion::Steam: result = kh1_cn_steam_Apply(module, mod_path); break;
-    case ExeVersion::EpicCrack: result = kh1_cn_epic_crack_Apply(module, mod_path); break;
-    default: std::unreachable();
-    }
-
-    if (!result) {
-        return false;
-    }
-
-    return kh1_text_apply(module, kh1s);
 }
 
 bool khlauncher_cn_Apply(HMODULE module, std::wstring_view mod_path) noexcept {
