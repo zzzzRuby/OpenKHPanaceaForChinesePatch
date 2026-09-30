@@ -355,8 +355,8 @@ static constexpr PatchEntry kh1_cn_steam_patches_in_dll[] = {
     kh1_cn_steam_entry_25,
     kh1_cn_steam_entry_26,
     kh1_cn_steam_entry_27,
-    kh1_cn_steam_entry_28,
-    //remove 29
+    //remove 28
+    kh1_cn_steam_entry_29,
     kh1_cn_steam_entry_30,
     kh1_cn_steam_entry_31,
     kh1_cn_steam_entry_32,
@@ -372,7 +372,6 @@ static constexpr PatchEntry kh1_cn_steam_patches_in_dll[] = {
     kh1_cn_steam_entry_42,
     kh1_cn_steam_entry_43,
     kh1_cn_steam_entry_44,
-    kh1_cn_steam_entry_45,
 };
 
 static bool kh1_cn_steam_Apply(HMODULE module, std::wstring_view mod_path) noexcept {
@@ -380,7 +379,7 @@ static bool kh1_cn_steam_Apply(HMODULE module, std::wstring_view mod_path) noexc
         return false;
     }
     
-    if (!apply_kh1_sys_font_tbl(module, kh1_cn_steam_entry_29.rva, kh1_cn_steam_entry_29.sect, "kh1_cn_steam")) {
+    if (!apply_kh1_sys_font_tbl(module, kh1_cn_steam_entry_28.rva, kh1_cn_steam_entry_28.sect, "kh1_cn_steam")) {
         return false;
     }
 
@@ -440,8 +439,8 @@ static constexpr PatchEntry kh1_cn_epic_crack_patches_in_dll[] = {
     kh1_cn_epic_crack_entry_25,
     kh1_cn_epic_crack_entry_26,
     kh1_cn_epic_crack_entry_27,
-    kh1_cn_epic_crack_entry_28,
-    //remove 29
+    //remove 28
+    kh1_cn_epic_crack_entry_29,
     kh1_cn_epic_crack_entry_30,
     kh1_cn_epic_crack_entry_31,
     kh1_cn_epic_crack_entry_32,
@@ -455,7 +454,6 @@ static constexpr PatchEntry kh1_cn_epic_crack_patches_in_dll[] = {
     kh1_cn_epic_crack_entry_40,
     kh1_cn_epic_crack_entry_41,
     kh1_cn_epic_crack_entry_42,
-    kh1_cn_epic_crack_entry_43,
 };
 
 static bool kh1_cn_epic_crack_Apply(HMODULE module, std::wstring_view mod_path) noexcept {
@@ -463,7 +461,7 @@ static bool kh1_cn_epic_crack_Apply(HMODULE module, std::wstring_view mod_path) 
         return false;
     }
 
-    if (!apply_kh1_sys_font_tbl(module, kh1_cn_epic_crack_entry_29.rva, kh1_cn_epic_crack_entry_29.sect, "kh1_cn_epic_crack")) {
+    if (!apply_kh1_sys_font_tbl(module, kh1_cn_epic_crack_entry_28.rva, kh1_cn_epic_crack_entry_28.sect, "kh1_cn_epic_crack")) {
         return false;
     }
 
@@ -510,7 +508,7 @@ static std::optional<ExeVersion> game ## _detect_version(HMODULE module) noexcep
     return std::nullopt;                                                                            \
 }
 
-#define SHIRO_DETECT_VERSION(game, version, module)                                                  \
+#define SHIRO_DETECT_VERSION(game, version, module)                                                 \
 const auto ______ ## version ## _opt = game ## _detect_version(module);                             \
 if (!______ ## version ## _opt.has_value()) {                                                       \
     return false;                                                                                   \

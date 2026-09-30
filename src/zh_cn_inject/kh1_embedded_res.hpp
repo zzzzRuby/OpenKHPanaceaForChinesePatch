@@ -9,8 +9,8 @@ struct DataRef {
 };
 
 static constexpr size_t STUB_SIZE = 16;
-static constexpr uintptr_t KH1_FUCKING_EMBEDDED_RES_START_STEAM = kh1_cn_steam_entry_29.rva + 16;
-static constexpr uintptr_t KH1_FUCKING_EMBEDDED_RES_START_EPIC_CRACK = kh1_cn_epic_crack_entry_29.rva + 16;
+static constexpr uintptr_t KH1_FUCKING_EMBEDDED_RES_START_STEAM = kh1_cn_steam_entry_28.rva + 16;
+static constexpr uintptr_t KH1_FUCKING_EMBEDDED_RES_START_EPIC_CRACK = kh1_cn_epic_crack_entry_28.rva + 16;
 
 static const DataRef kh1_fucking_embedded_item_shop_message_refs_steam[] = {
     {0x1CA6C9, 0x15, {0x48, 0x8D, 0x15, 0x00, 0x66, 0x33, 0x00}},
