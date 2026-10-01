@@ -130,7 +130,7 @@ static const uint8_t KH1S_STRING_23[5] = {
     0x17, 0x51, 0x16, 0x5a, 0x00
 };
 
-static const KH1S_StringPatch KH1S_PATCH_TABLE_steam[24] = {
+static constexpr KH1S_StringPatch KH1S_PATCH_TABLE_steam[24] = {
     {KH1S_STRING_0, 0x00000000004e40a0ULL, sizeof(KH1S_STRING_0)},
     {KH1S_STRING_1, 0x00000000004e40c0ULL, sizeof(KH1S_STRING_1)},
     {KH1S_STRING_2, 0x00000000004e40e0ULL, sizeof(KH1S_STRING_2)},
@@ -156,7 +156,7 @@ static const KH1S_StringPatch KH1S_PATCH_TABLE_steam[24] = {
     {KH1S_STRING_22, 0x00000000004e4490ULL, sizeof(KH1S_STRING_22)},
     {KH1S_STRING_23, 0x00000000004e4080ULL, sizeof(KH1S_STRING_23)},
 };
-static const KH1S_StringPatch KH1S_PATCH_TABLE_epic_crack[24] = {
+static constexpr KH1S_StringPatch KH1S_PATCH_TABLE_epic_crack[24] = {
     {KH1S_STRING_0, 0x00000000004e0d30ULL, sizeof(KH1S_STRING_0)},
     {KH1S_STRING_1, 0x00000000004e0d50ULL, sizeof(KH1S_STRING_1)},
     {KH1S_STRING_2, 0x00000000004e0d70ULL, sizeof(KH1S_STRING_2)},
@@ -182,7 +182,7 @@ static const KH1S_StringPatch KH1S_PATCH_TABLE_epic_crack[24] = {
     {KH1S_STRING_22, 0x00000000004e1120ULL, sizeof(KH1S_STRING_22)},
     {KH1S_STRING_23, 0x00000000004e0d10ULL, sizeof(KH1S_STRING_23)},
 };
-static const KH1S_StringPatch KH1S_PATCH_TABLE_epic[24] = {
+static constexpr KH1S_StringPatch KH1S_PATCH_TABLE_epic[24] = {
     {KH1S_STRING_0, 0x0000000000000000ULL, sizeof(KH1S_STRING_0)},
     {KH1S_STRING_1, 0x0000000000000000ULL, sizeof(KH1S_STRING_1)},
     {KH1S_STRING_2, 0x0000000000000000ULL, sizeof(KH1S_STRING_2)},
@@ -211,73 +211,129 @@ static const KH1S_StringPatch KH1S_PATCH_TABLE_epic[24] = {
 
 #include "patch_entry.h"
 
+#ifdef SHIRO_PATCH_VALIDATE
 static const uint8_t kh1_embedded_text_old_bytes_steam_0[5] = {
     0xee, 0x19, 0x06, 0x00, 0x00
 };
-
+#endif
 static const uint8_t kh1_embedded_text_new_bytes_steam_0[5] = {
     0x17, 0x51, 0x16, 0x5a, 0x00
 };
 
-static constexpr PatchEntry kh1_embedded_text_patch_steam_0 = {0x4fe060, kh1_embedded_text_old_bytes_steam_0, kh1_embedded_text_new_bytes_steam_0, sizeof(kh1_embedded_text_new_bytes_steam_0), ".data"};
+static constexpr PatchEntry kh1_embedded_text_patch_steam_0 = {
+    0x4fe060,
+#ifdef SHIRO_PATCH_VALIDATE
+    kh1_embedded_text_old_bytes_steam_0,
+#endif
+    kh1_embedded_text_new_bytes_steam_0,
+    sizeof(kh1_embedded_text_new_bytes_steam_0),
+    ".data"
+};
 
+#ifdef SHIRO_PATCH_VALIDATE
 static const uint8_t kh1_embedded_text_old_bytes_steam_1[8] = {
     0x19, 0x1c, 0xf4, 0x19, 0x08, 0x19, 0x1c, 0x00
 };
-
+#endif
 static const uint8_t kh1_embedded_text_new_bytes_steam_1[8] = {
     0x15, 0xac, 0x17, 0x6a, 0x18, 0x35, 0x00, 0x00
 };
 
-static constexpr PatchEntry kh1_embedded_text_patch_steam_1 = {0x4fe080, kh1_embedded_text_old_bytes_steam_1, kh1_embedded_text_new_bytes_steam_1, sizeof(kh1_embedded_text_new_bytes_steam_1), ".data"};
+static constexpr PatchEntry kh1_embedded_text_patch_steam_1 = {
+    0x4fe080,
+#ifdef SHIRO_PATCH_VALIDATE
+    kh1_embedded_text_old_bytes_steam_1,
+#endif
+    kh1_embedded_text_new_bytes_steam_1,
+    sizeof(kh1_embedded_text_new_bytes_steam_1),
+    ".data"
+};
 
+#ifdef SHIRO_PATCH_VALIDATE
 static const uint8_t kh1_embedded_text_old_bytes_steam_2[8] = {
     0x19, 0x10, 0x55, 0xfb, 0x19, 0x29, 0x55, 0x00
 };
-
+#endif
 static const uint8_t kh1_embedded_text_new_bytes_steam_2[8] = {
     0x18, 0x30, 0x18, 0x29, 0x00, 0x00, 0x00, 0x00
 };
 
-static constexpr PatchEntry kh1_embedded_text_patch_steam_2 = {0x4fe0a0, kh1_embedded_text_old_bytes_steam_2, kh1_embedded_text_new_bytes_steam_2, sizeof(kh1_embedded_text_new_bytes_steam_2), ".data"};
+static constexpr PatchEntry kh1_embedded_text_patch_steam_2 = {
+    0x4fe0a0,
+#ifdef SHIRO_PATCH_VALIDATE
+    kh1_embedded_text_old_bytes_steam_2,
+#endif
+    kh1_embedded_text_new_bytes_steam_2,
+    sizeof(kh1_embedded_text_new_bytes_steam_2),
+    ".data"
+};
 
 static constexpr PatchEntry kh1_embedded_text_steam[3] = {
     kh1_embedded_text_patch_steam_0,
     kh1_embedded_text_patch_steam_1,
     kh1_embedded_text_patch_steam_2,
 };
+
+#ifdef SHIRO_PATCH_VALIDATE
 static const uint8_t kh1_embedded_text_old_bytes_epic_crack_0[5] = {
     0xee, 0x19, 0x06, 0x00, 0x00
 };
-
+#endif
 static const uint8_t kh1_embedded_text_new_bytes_epic_crack_0[5] = {
     0x17, 0x51, 0x16, 0x5a, 0x00
 };
 
-static constexpr PatchEntry kh1_embedded_text_patch_epic_crack_0 = {0x4facf0, kh1_embedded_text_old_bytes_epic_crack_0, kh1_embedded_text_new_bytes_epic_crack_0, sizeof(kh1_embedded_text_new_bytes_epic_crack_0), ".data"};
+static constexpr PatchEntry kh1_embedded_text_patch_epic_crack_0 = {
+    0x4facf0,
+#ifdef SHIRO_PATCH_VALIDATE
+    kh1_embedded_text_old_bytes_epic_crack_0,
+#endif
+    kh1_embedded_text_new_bytes_epic_crack_0,
+    sizeof(kh1_embedded_text_new_bytes_epic_crack_0),
+    ".data"
+};
 
+#ifdef SHIRO_PATCH_VALIDATE
 static const uint8_t kh1_embedded_text_old_bytes_epic_crack_1[8] = {
     0x19, 0x1c, 0xf4, 0x19, 0x08, 0x19, 0x1c, 0x00
 };
-
+#endif
 static const uint8_t kh1_embedded_text_new_bytes_epic_crack_1[8] = {
     0x15, 0xac, 0x17, 0x6a, 0x18, 0x35, 0x00, 0x00
 };
 
-static constexpr PatchEntry kh1_embedded_text_patch_epic_crack_1 = {0x4fad10, kh1_embedded_text_old_bytes_epic_crack_1, kh1_embedded_text_new_bytes_epic_crack_1, sizeof(kh1_embedded_text_new_bytes_epic_crack_1), ".data"};
+static constexpr PatchEntry kh1_embedded_text_patch_epic_crack_1 = {
+    0x4fad10,
+#ifdef SHIRO_PATCH_VALIDATE
+    kh1_embedded_text_old_bytes_epic_crack_1,
+#endif
+    kh1_embedded_text_new_bytes_epic_crack_1,
+    sizeof(kh1_embedded_text_new_bytes_epic_crack_1),
+    ".data"
+};
 
+#ifdef SHIRO_PATCH_VALIDATE
 static const uint8_t kh1_embedded_text_old_bytes_epic_crack_2[8] = {
     0x19, 0x10, 0x55, 0xfb, 0x19, 0x29, 0x55, 0x00
 };
-
+#endif
 static const uint8_t kh1_embedded_text_new_bytes_epic_crack_2[8] = {
     0x18, 0x30, 0x18, 0x29, 0x00, 0x00, 0x00, 0x00
 };
 
-static constexpr PatchEntry kh1_embedded_text_patch_epic_crack_2 = {0x4fad30, kh1_embedded_text_old_bytes_epic_crack_2, kh1_embedded_text_new_bytes_epic_crack_2, sizeof(kh1_embedded_text_new_bytes_epic_crack_2), ".data"};
+static constexpr PatchEntry kh1_embedded_text_patch_epic_crack_2 = {
+    0x4fad30,
+#ifdef SHIRO_PATCH_VALIDATE
+    kh1_embedded_text_old_bytes_epic_crack_2,
+#endif
+    kh1_embedded_text_new_bytes_epic_crack_2,
+    sizeof(kh1_embedded_text_new_bytes_epic_crack_2),
+    ".data"
+};
 
 static constexpr PatchEntry kh1_embedded_text_epic_crack[3] = {
     kh1_embedded_text_patch_epic_crack_0,
     kh1_embedded_text_patch_epic_crack_1,
     kh1_embedded_text_patch_epic_crack_2,
 };
+

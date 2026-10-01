@@ -59,19 +59,21 @@ static bool calc_module_sha512(HMODULE module, std::array<std::byte, 64>& outHas
 
 static bool apply_patch(HMODULE module, const PatchEntry* entries, size_t entry_count, const char* patch_name) noexcept {
     unsigned char *base = (unsigned char *)module;
-    size_t applied = 0;
+    size_t failed = 0;
     for (size_t i = 0; i < entry_count; i++) {
         const PatchEntry *p = &entries[i];
         unsigned char *addr = base + p->rva;
+#ifdef SHIRO_PATCH_VALIDATE
         if (memcmp(addr, p->orig, p->len) != 0) {
             if (memcmp(addr, p->patch, p->len) == 0) {
-                applied++;
                 continue;
             }
             printf("[%s] Patch %zu verification failed at RVA 0x%llX (%s)",
                 patch_name, i, (unsigned long long)p->rva, p->sect);
+            failed++;
             continue;
         }
+#endif
         DWORD oldProtect;
         if (!VirtualProtect(addr, p->len, PAGE_EXECUTE_READWRITE, &oldProtect)) {
             printf("[%s] VirtualProtect failed for patch %zu at RVA 0x%llX err=%lu",
@@ -81,9 +83,8 @@ static bool apply_patch(HMODULE module, const PatchEntry* entries, size_t entry_
         memcpy(addr, p->patch, p->len);
         DWORD dummy;
         VirtualProtect(addr, p->len, oldProtect, &dummy);
-        applied++;
     }
-    return applied == entry_count;
+    return failed == 0;
 }
 
 static bool kh1_text_apply(HMODULE module, const KH1S_StringPatch* patches) noexcept {
@@ -129,18 +130,22 @@ static bool kh1_text_apply(HMODULE module, const KH1S_StringPatch* patches) noex
     return failures == 0;
 }
 
+#ifdef SHIRO_PATCH_VALIDATE
 static const uint8_t zeros[STUB_SIZE] = {0};
+#endif
 
 static bool kh1_fucking_embedded_res(HMODULE module, void* var, const DataRef* refs, size_t refCount, uintptr_t stub_rva, const char* name) {
     uint8_t* base = (uint8_t*)module;
 
-    std::vector<PatchEntry> entries(refCount * 2);
-    std::vector<std::array<uint8_t, STUB_SIZE>> stubPatches(refCount);
-    std::vector<std::array<uint8_t, 7>> leaPatches(refCount);
-
     for (size_t i = 0; i < refCount; i++) {
         const DataRef& r = refs[i];
-        uint8_t* stub = stubPatches[i].data();
+        PatchEntry entries[2];
+
+        std::array<uint8_t, STUB_SIZE> stubArray;
+        std::array<uint8_t, 7> leaPatchArray;
+
+        auto stub = stubArray.data();
+        auto leaPatch = leaPatchArray.data();
         uintptr_t stubAddr = (uintptr_t)base + stub_rva + i * STUB_SIZE;
         uint8_t* leaAddr = base + r.leaRva;
 
@@ -154,18 +159,25 @@ static bool kh1_fucking_embedded_res(HMODULE module, void* var, const DataRef* r
         stub[10] = 0xE9; 
         *(int32_t*)(stub + 11) = (int32_t)(ptrdiff_t)((leaAddr + 7) - (stubAddr + 15));
 
-        entries[i * 2] = {stub_rva + i * STUB_SIZE, zeros, stub, STUB_SIZE, ".text(padding)"};
-
-        uint8_t* leaPatch = leaPatches[i].data();
         leaPatch[0] = 0xE9;
         *(int32_t*)(leaPatch + 1) = (int32_t)(stubAddr - (uintptr_t)(leaAddr + 5));
         leaPatch[5] = 0x90;
         leaPatch[6] = 0x90;
 
-        entries[i * 2 + 1] = {r.leaRva, r.origLea, leaPatch, 7, ".text"};
+#ifdef SHIRO_PATCH_VALIDATE
+        entries[0] = {stub_rva + i * STUB_SIZE, zeros, stub, STUB_SIZE, ".text(padding)"};
+        entries[1] = {r.leaRva, r.origLea, leaPatch, 7, ".text"};
+#else
+        entries[0] = {stub_rva + i * STUB_SIZE, stub, STUB_SIZE, ".text(padding)"};
+        entries[1] = {r.leaRva, leaPatch, 7, ".text"};
+#endif
+
+        if (!apply_patch(module, entries, _countof(entries), name)) {
+            return false;
+        }
     }
 
-    return apply_patch(module, entries.data(), refCount * 2, name);
+    return true;
 }
 
 static BOOL read_mod_file(
@@ -232,9 +244,11 @@ static BOOL read_mod_file(
 static uint8_t sys_font_tbl[0x10000] = { 0 };
 
 static bool apply_kh1_sys_font_tbl(HMODULE module, uintptr_t rva, const char* sect, const char* name) noexcept {
+#ifdef SHIRO_PATCH_VALIDATE
     constexpr uint8_t orig[11] = {
         0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00
     };
+#endif
 
     uint8_t patch[11];
     
@@ -245,7 +259,9 @@ static bool apply_kh1_sys_font_tbl(HMODULE module, uintptr_t rva, const char* se
 
     const PatchEntry entry = { 
         rva, 
+#ifdef SHIRO_PATCH_VALIDATE
         orig,
+#endif
         patch,
         sizeof(patch),
         sect,

@@ -3,6 +3,7 @@ cmake_minimum_required(VERSION 3.21)
 project(OpenKhResearchPanacea LANGUAGES C CXX)
 
 option(PANACEA_WITH_VAG_STREAM_HOOKS "Build panacea with VAG_STREAM hooks" OFF)
+option(SHIRO_PATCH_VALIDATE "Enable patch validation" OFF)
 
 set(CMAKE_CXX_STANDARD 23)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
@@ -58,6 +59,9 @@ function(panacea_dll TARGET)
 	target_link_libraries(${TARGET} PRIVATE
 		Shlwapi
 	)
+	if (SHIRO_PATCH_VALIDATE)
+		target_compile_definitions(${TARGET} PRIVATE SHIRO_PATCH_VALIDATE)
+	endif()
 	if (PANACEA_WITH_VAG_STREAM_HOOKS)
 		target_include_directories(${TARGET} PRIVATE
 			"${CMAKE_CURRENT_SOURCE_DIR}/dependencies"
