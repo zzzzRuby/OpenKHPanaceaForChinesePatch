@@ -78,6 +78,7 @@ static bool apply_patch(HMODULE module, const PatchEntry* entries, size_t entry_
         if (!VirtualProtect(addr, p->len, PAGE_EXECUTE_READWRITE, &oldProtect)) {
             printf("[%s] VirtualProtect failed for patch %zu at RVA 0x%llX err=%lu",
                 patch_name, i, (unsigned long long)p->rva, GetLastError());
+            failed++;
             continue;
         }
         memcpy(addr, p->patch, p->len);
@@ -130,10 +131,6 @@ static bool kh1_text_apply(HMODULE module, const KH1S_StringPatch* patches) noex
     return failures == 0;
 }
 
-#ifdef SHIRO_PATCH_VALIDATE
-static const uint8_t zeros[STUB_SIZE] = {0};
-#endif
-
 static bool kh1_fucking_embedded_res(HMODULE module, void* var, const DataRef* refs, size_t refCount, uintptr_t stub_rva, const char* name) {
     uint8_t* base = (uint8_t*)module;
 
@@ -165,6 +162,8 @@ static bool kh1_fucking_embedded_res(HMODULE module, void* var, const DataRef* r
         leaPatch[6] = 0x90;
 
 #ifdef SHIRO_PATCH_VALIDATE
+        const uint8_t zeros[STUB_SIZE] = {0};
+
         entries[0] = {stub_rva + i * STUB_SIZE, zeros, stub, STUB_SIZE, ".text(padding)"};
         entries[1] = {r.leaRva, r.origLea, leaPatch, 7, ".text"};
 #else
@@ -295,14 +294,14 @@ static bool kh1_read_embedded_files(std::wstring_view mod_path) {
     return true;
 }
 
-struct Kh1ResourceConfig {
+struct KH1ResourceConfig {
     void* var_ptr;
     const DataRef* refs;
     size_t ref_count;
     uintptr_t stub_rva;
 };
 
-static constexpr Kh1ResourceConfig kh1_steam_embedded_files[] = {
+static constexpr KH1ResourceConfig kh1_steam_embedded_files[] = {
     { &kh1_fucked_embedded_item_shop_message[0], kh1_fucking_embedded_item_shop_message_refs_steam,  _countof(kh1_fucking_embedded_item_shop_message_refs_steam),  KH1_FUCKING_EMBEDDED_ITEM_SHOP_MESSAGE_STUB_RVA_STEAM },
     { &kh1_fucked_embedded_item_shop_message[4], kh1_fucking_embedded_item_shop_message_refs_steam2, _countof(kh1_fucking_embedded_item_shop_message_refs_steam2), KH1_FUCKING_EMBEDDED_ITEM_SHOP_MESSAGE_STUB_RVA_STEAM2 },
     { &kh1_fucked_embedded_phil_cup[0],          kh1_fucking_embedded_phil_cup_refs_steam,           _countof(kh1_fucking_embedded_phil_cup_refs_steam),           KH1_FUCKING_EMBEDDED_PHIL_CUP_STUB_RVA_STEAM },
@@ -315,7 +314,7 @@ static constexpr Kh1ResourceConfig kh1_steam_embedded_files[] = {
     { &kh1_fucked_embedded_hades_cup[4],         kh1_fucking_embedded_hades_cup_refs_steam2,         _countof(kh1_fucking_embedded_hades_cup_refs_steam2),         KH1_FUCKING_EMBEDDED_HADES_CUP_STUB_RVA_STEAM2 },
 };
 
-static constexpr Kh1ResourceConfig kh1_epic_crack_embedded_files[] = {
+static constexpr KH1ResourceConfig kh1_epic_crack_embedded_files[] = {
     { &kh1_fucked_embedded_item_shop_message[0], kh1_fucking_embedded_item_shop_message_refs_epic_crack,  _countof(kh1_fucking_embedded_item_shop_message_refs_epic_crack),  KH1_FUCKING_EMBEDDED_ITEM_SHOP_MESSAGE_STUB_RVA_EPIC_CRACK },
     { &kh1_fucked_embedded_item_shop_message[4], kh1_fucking_embedded_item_shop_message_refs_epic_crack2, _countof(kh1_fucking_embedded_item_shop_message_refs_epic_crack2), KH1_FUCKING_EMBEDDED_ITEM_SHOP_MESSAGE_STUB_RVA_EPIC_CRACK2 },
     { &kh1_fucked_embedded_phil_cup[0],          kh1_fucking_embedded_phil_cup_refs_epic_crack,           _countof(kh1_fucking_embedded_phil_cup_refs_epic_crack),           KH1_FUCKING_EMBEDDED_PHIL_CUP_STUB_RVA_EPIC_CRACK },
@@ -328,7 +327,7 @@ static constexpr Kh1ResourceConfig kh1_epic_crack_embedded_files[] = {
     { &kh1_fucked_embedded_hades_cup[4],         kh1_fucking_embedded_hades_cup_refs_epic_crack2,         _countof(kh1_fucking_embedded_hades_cup_refs_epic_crack2),         KH1_FUCKING_EMBEDDED_HADES_CUP_STUB_RVA_EPIC_CRACK2 },
 };
 
-static bool kh1_apply_embedded_files(HMODULE module, const Kh1ResourceConfig* configs, size_t count, const char* name) noexcept {
+static bool kh1_apply_embedded_files(HMODULE module, const KH1ResourceConfig* configs, size_t count, const char* name) noexcept {
     for (size_t i = 0;i < count;i++) {
         auto& config = configs[i];
         if (!kh1_fucking_embedded_res(module, config.var_ptr, config.refs, config.ref_count, config.stub_rva, name)) {
