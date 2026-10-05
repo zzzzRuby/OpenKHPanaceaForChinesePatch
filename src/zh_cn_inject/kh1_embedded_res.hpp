@@ -18,9 +18,13 @@ struct DataRef {
 #define SHIRO_OPTIONAL_VALIDATE(x, ...) {x}
 #endif
 
-static constexpr size_t STUB_SIZE = 16;
-static constexpr uintptr_t KH1_FUCKING_EMBEDDED_RES_START_STEAM = kh1_cn_steam_entry_28.rva + 16;
-static constexpr uintptr_t KH1_FUCKING_EMBEDDED_RES_START_EPIC_CRACK = kh1_cn_epic_crack_entry_28.rva + 16;
+static constexpr size_t STUB_SIZE = 15;
+static constexpr uintptr_t KH1_FUCKING_EMBEDDED_RES_START_STEAM = kh1_cn_steam_entry_28.rva + kh1_cn_steam_entry_28.len;
+static constexpr uintptr_t KH1_FUCKING_EMBEDDED_RES_START_EPIC_CRACK = kh1_cn_epic_crack_entry_28.rva + kh1_cn_epic_crack_entry_28.len;
+static constexpr uintptr_t KH1_FUCKING_EMBEDDED_WSYSMSG_DATA_RVA_STEAM          = 0x50ed80;
+static constexpr uintptr_t KH1_FUCKING_EMBEDDED_WSYSMSG_OFFSET_RVA_STEAM        = 0x50ee00;
+static constexpr uintptr_t KH1_FUCKING_EMBEDDED_WSYSMSG_DATA_RVA_EPIC_CRACK     = 0x50b5f0;
+static constexpr uintptr_t KH1_FUCKING_EMBEDDED_WSYSMSG_OFFSET_RVA_EPIC_CRACK   = 0x50b670;
 
 static const DataRef kh1_fucking_embedded_item_shop_message_refs_steam[] = {
     {0x1CA6C9, 0x15, SHIRO_OPTIONAL_VALIDATE(0x48, 0x8D, 0x15, 0x00, 0x66, 0x33, 0x00)},

@@ -270,6 +270,8 @@ static bool apply_kh1_sys_font_tbl(HMODULE module, uintptr_t rva, const char* se
 } 
 
 static uint8_t kh1_fucked_embedded_item_shop_message[0x2000] = { 0 }; // size = 8192
+static uint8_t kh1_fucked_embedded_wsysmsg_data[0x80] = { 0 };       // size = 128
+static uint8_t kh1_fucked_embedded_wsysmsg_offset[0x80] = { 0 };     // size = 128
 static uint8_t kh1_fucked_embedded_phil_cup[0x1000] = { 0 };          // size = 4096
 static uint8_t kh1_fucked_embedded_pegasus_cup[0x1000] = { 0 };       // size = 4096
 static uint8_t kh1_fucked_embedded_hercules_cup[0x1000] = { 0 };      // size = 4096
@@ -277,6 +279,12 @@ static uint8_t kh1_fucked_embedded_hades_cup[0x1000] = { 0 };         // size = 
 
 static bool kh1_read_embedded_files(std::wstring_view mod_path) {
     if (!read_mod_file(mod_path, L"item_shop_message.bin", kh1_fucked_embedded_item_shop_message, sizeof(kh1_fucked_embedded_item_shop_message))) {
+        return false;
+    }
+    if (!read_mod_file(mod_path, L"exchange\\FM_wsysmsg_data.bin", kh1_fucked_embedded_wsysmsg_data, sizeof(kh1_fucked_embedded_wsysmsg_data))) {
+        return false;
+    }
+    if (!read_mod_file(mod_path, L"exchange\\FM_wsysmsg_offset.bin", kh1_fucked_embedded_wsysmsg_offset, sizeof(kh1_fucked_embedded_wsysmsg_offset))) {
         return false;
     }
     if (!read_mod_file(mod_path, L"exchange\\FM_phil_cup.bin", kh1_fucked_embedded_phil_cup, sizeof(kh1_fucked_embedded_phil_cup))) {
@@ -291,6 +299,33 @@ static bool kh1_read_embedded_files(std::wstring_view mod_path) {
     if (!read_mod_file(mod_path, L"exchange\\FM_hades_cup.bin", kh1_fucked_embedded_hades_cup, sizeof(kh1_fucked_embedded_hades_cup))) {
         return false;
     }
+    return true;
+}
+
+static bool kh1_fucking_wsysmsg(HMODULE module, uintptr_t data_rva, const uint8_t* data, uintptr_t offset_rva, const uint8_t* offset, const char* name) noexcept {
+    constexpr size_t PATCH_LEN = 0x80;
+    
+    unsigned char *base = (unsigned char *)module;
+    unsigned char *data_addr = base + data_rva;
+    unsigned char *offset_addr = base + offset_rva;
+    DWORD oldProtect, dummy;
+    
+    if (!VirtualProtect(data_addr, PATCH_LEN, PAGE_EXECUTE_READWRITE, &oldProtect)) {
+        printf("[%s] VirtualProtect failed for data_rva 0x%llX err=%lu\n",
+            name, (unsigned long long)data_rva, GetLastError());
+        return false;
+    }
+    memcpy(data_addr, data, PATCH_LEN);
+    VirtualProtect(data_addr, PATCH_LEN, oldProtect, &dummy);
+
+    if (!VirtualProtect(offset_addr, PATCH_LEN, PAGE_EXECUTE_READWRITE, &oldProtect)) {
+        printf("[%s] VirtualProtect failed for offset_rva 0x%llX err=%lu\n",
+            name, (unsigned long long)offset_rva, GetLastError());
+        return false;
+    }
+    memcpy(offset_addr, offset, PATCH_LEN);
+    VirtualProtect(offset_addr, PATCH_LEN, oldProtect, &dummy);
+
     return true;
 }
 
@@ -406,6 +441,10 @@ static bool kh1_cn_steam_Apply(HMODULE module, std::wstring_view mod_path) noexc
         return false;
     }
 
+    if (!kh1_fucking_wsysmsg(module, KH1_FUCKING_EMBEDDED_WSYSMSG_DATA_RVA_STEAM, kh1_fucked_embedded_wsysmsg_data, KH1_FUCKING_EMBEDDED_WSYSMSG_OFFSET_RVA_STEAM, kh1_fucked_embedded_wsysmsg_offset, "kh1_cn_steam")) {
+        return false;
+    }
+
     if (!apply_patch(module, kh1_embedded_text_steam, _countof(kh1_embedded_text_steam), "kh1_cn_steam")) {
         return false;
     }
@@ -485,6 +524,10 @@ static bool kh1_cn_epic_crack_Apply(HMODULE module, std::wstring_view mod_path) 
     }
     
     if (!kh1_apply_embedded_files(module, kh1_epic_crack_embedded_files, _countof(kh1_epic_crack_embedded_files), "kh1_cn_epic_crack")) {
+        return false;
+    }
+
+    if (!kh1_fucking_wsysmsg(module, KH1_FUCKING_EMBEDDED_WSYSMSG_DATA_RVA_EPIC_CRACK, kh1_fucked_embedded_wsysmsg_data, KH1_FUCKING_EMBEDDED_WSYSMSG_OFFSET_RVA_EPIC_CRACK, kh1_fucked_embedded_wsysmsg_offset, "kh1_cn_epic_crack")) {
         return false;
     }
 
