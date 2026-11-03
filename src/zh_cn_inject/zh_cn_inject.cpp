@@ -270,6 +270,7 @@ static bool apply_kh1_sys_font_tbl(HMODULE module, uintptr_t rva, const char* se
 } 
 
 static uint8_t kh1_fucked_embedded_item_shop_message[0x2000] = { 0 }; // size = 8192
+static uint8_t kh1_fucked_embedded_gumi_shop_message[0x1000] = { 0 }; // size = 4096
 static uint8_t kh1_fucked_embedded_wsysmsg_data[0x80] = { 0 };       // size = 128
 static uint8_t kh1_fucked_embedded_wsysmsg_offset[0x80] = { 0 };     // size = 128
 static uint8_t kh1_fucked_embedded_phil_cup[0x1000] = { 0 };          // size = 4096
@@ -279,6 +280,9 @@ static uint8_t kh1_fucked_embedded_hades_cup[0x1000] = { 0 };         // size = 
 
 static bool kh1_read_embedded_files(std::wstring_view mod_path) {
     if (!read_mod_file(mod_path, L"item_shop_message.bin", kh1_fucked_embedded_item_shop_message, sizeof(kh1_fucked_embedded_item_shop_message))) {
+        return false;
+    }
+    if (!read_mod_file(mod_path, L"gumi_shop_message.bin", kh1_fucked_embedded_gumi_shop_message, sizeof(kh1_fucked_embedded_gumi_shop_message))) {
         return false;
     }
     if (!read_mod_file(mod_path, L"exchange\\FM_wsysmsg_data.bin", kh1_fucked_embedded_wsysmsg_data, sizeof(kh1_fucked_embedded_wsysmsg_data))) {
@@ -339,6 +343,8 @@ struct KH1ResourceConfig {
 static constexpr KH1ResourceConfig kh1_steam_embedded_files[] = {
     { &kh1_fucked_embedded_item_shop_message[0], kh1_fucking_embedded_item_shop_message_refs_steam,  _countof(kh1_fucking_embedded_item_shop_message_refs_steam),  KH1_FUCKING_EMBEDDED_ITEM_SHOP_MESSAGE_STUB_RVA_STEAM },
     { &kh1_fucked_embedded_item_shop_message[4], kh1_fucking_embedded_item_shop_message_refs_steam2, _countof(kh1_fucking_embedded_item_shop_message_refs_steam2), KH1_FUCKING_EMBEDDED_ITEM_SHOP_MESSAGE_STUB_RVA_STEAM2 },
+    { &kh1_fucked_embedded_gumi_shop_message[0], kh1_fucking_embedded_gumi_shop_message_refs_steam,  _countof(kh1_fucking_embedded_gumi_shop_message_refs_steam),  KH1_FUCKING_EMBEDDED_GUMI_SHOP_MESSAGE_STUB_RVA_STEAM },
+    { &kh1_fucked_embedded_gumi_shop_message[4], kh1_fucking_embedded_gumi_shop_message_refs_steam2, _countof(kh1_fucking_embedded_gumi_shop_message_refs_steam2), KH1_FUCKING_EMBEDDED_GUMI_SHOP_MESSAGE_STUB_RVA_STEAM2 },
     { &kh1_fucked_embedded_phil_cup[0],          kh1_fucking_embedded_phil_cup_refs_steam,           _countof(kh1_fucking_embedded_phil_cup_refs_steam),           KH1_FUCKING_EMBEDDED_PHIL_CUP_STUB_RVA_STEAM },
     { &kh1_fucked_embedded_phil_cup[4],          kh1_fucking_embedded_phil_cup_refs_steam2,          _countof(kh1_fucking_embedded_phil_cup_refs_steam2),          KH1_FUCKING_EMBEDDED_PHIL_CUP_STUB_RVA_STEAM2 },
     { &kh1_fucked_embedded_pegasus_cup[0],       kh1_fucking_embedded_pegasus_cup_refs_steam,        _countof(kh1_fucking_embedded_pegasus_cup_refs_steam),        KH1_FUCKING_EMBEDDED_PEGASUS_CUP_STUB_RVA_STEAM },
@@ -352,6 +358,8 @@ static constexpr KH1ResourceConfig kh1_steam_embedded_files[] = {
 static constexpr KH1ResourceConfig kh1_epic_crack_embedded_files[] = {
     { &kh1_fucked_embedded_item_shop_message[0], kh1_fucking_embedded_item_shop_message_refs_epic_crack,  _countof(kh1_fucking_embedded_item_shop_message_refs_epic_crack),  KH1_FUCKING_EMBEDDED_ITEM_SHOP_MESSAGE_STUB_RVA_EPIC_CRACK },
     { &kh1_fucked_embedded_item_shop_message[4], kh1_fucking_embedded_item_shop_message_refs_epic_crack2, _countof(kh1_fucking_embedded_item_shop_message_refs_epic_crack2), KH1_FUCKING_EMBEDDED_ITEM_SHOP_MESSAGE_STUB_RVA_EPIC_CRACK2 },
+    { &kh1_fucked_embedded_gumi_shop_message[0], kh1_fucking_embedded_gumi_shop_message_refs_epic_crack,  _countof(kh1_fucking_embedded_gumi_shop_message_refs_epic_crack),  KH1_FUCKING_EMBEDDED_GUMI_SHOP_MESSAGE_STUB_RVA_EPIC_CRACK },
+    { &kh1_fucked_embedded_gumi_shop_message[4], kh1_fucking_embedded_gumi_shop_message_refs_epic_crack2, _countof(kh1_fucking_embedded_gumi_shop_message_refs_epic_crack2), KH1_FUCKING_EMBEDDED_GUMI_SHOP_MESSAGE_STUB_RVA_EPIC_CRACK2 },
     { &kh1_fucked_embedded_phil_cup[0],          kh1_fucking_embedded_phil_cup_refs_epic_crack,           _countof(kh1_fucking_embedded_phil_cup_refs_epic_crack),           KH1_FUCKING_EMBEDDED_PHIL_CUP_STUB_RVA_EPIC_CRACK },
     { &kh1_fucked_embedded_phil_cup[4],          kh1_fucking_embedded_phil_cup_refs_epic_crack2,          _countof(kh1_fucking_embedded_phil_cup_refs_epic_crack2),          KH1_FUCKING_EMBEDDED_PHIL_CUP_STUB_RVA_EPIC_CRACK2 },
     { &kh1_fucked_embedded_pegasus_cup[0],       kh1_fucking_embedded_pegasus_cup_refs_epic_crack,        _countof(kh1_fucking_embedded_pegasus_cup_refs_epic_crack),        KH1_FUCKING_EMBEDDED_PEGASUS_CUP_STUB_RVA_EPIC_CRACK },
@@ -566,6 +574,18 @@ static std::optional<ExeVersion> game ## _detect_version(HMODULE module) noexcep
     return std::nullopt;                                                                            \
 }
 
+#define SHIRO_DETECT_VERSION_IMPL_2_8(game)                                                         \
+static std::optional<ExeVersion> game ## _detect_version(HMODULE module) noexcept {                 \
+    std::array<std::byte, 64> currentHash{};                                                        \
+    if (!calc_module_sha512(module, currentHash)) {                                                 \
+        return std::nullopt;                                                                        \
+    }                                                                                               \
+    if (memcmp(game ## _cn_steam_sha512, currentHash.data(), currentHash.size()) == 0) {            \
+        return ExeVersion::Steam;                                                                   \
+    }                                                                                               \
+    return std::nullopt;                                                                            \
+}
+
 #define SHIRO_DETECT_VERSION(game, version, module)                                                 \
 const auto ______ ## version ## _opt = game ## _detect_version(module);                             \
 if (!______ ## version ## _opt.has_value()) {                                                       \
@@ -591,20 +611,7 @@ bool kh1_cn_Apply(HMODULE module, std::wstring_view mod_path) noexcept {
     switch(version) {
     case ExeVersion::Steam: return kh1_cn_steam_Apply(module, mod_path); break;
     case ExeVersion::EpicCrack: return kh1_cn_epic_crack_Apply(module, mod_path); break;
-    default: std::unreachable();
-    }
-}
-
-bool khlauncher_cn_Apply(HMODULE module, std::wstring_view mod_path) noexcept {
-    if (!check_shiro_info(mod_path)) {
-        return true;
-    }
-    SHIRO_DETECT_VERSION(khlauncher, version, module);
-
-    switch(version) {
-    case ExeVersion::Steam: return khlauncher_cn_steam_Apply(module);
-    case ExeVersion::EpicCrack: return khlauncher_cn_epic_crack_Apply(module);
-    default: std::unreachable();
+    default: return false;
     }
 }
 
@@ -617,7 +624,61 @@ bool khtheater_cn_Apply(HMODULE module, std::wstring_view mod_path) noexcept {
     switch(version) {
     case ExeVersion::Steam: return khtheater_cn_steam_Apply(module);
     case ExeVersion::EpicCrack: return khtheater_cn_epic_crack_Apply(module);
-    default: std::unreachable();
+    default: return false;
     }
 }
+
+bool khrecom_cn_Apply(HMODULE module, std::wstring_view mod_path) noexcept {
+    if (!check_shiro_info(mod_path)) {
+        return true;
+    }
+
+    return false;
+}
+
+bool kh2_cn_Apply(HMODULE module, std::wstring_view mod_path) noexcept {
+    if (!check_shiro_info(mod_path)) {
+        return true;
+    }
+
+    return false;
+}
+
+bool khbbs_cn_Apply(HMODULE module, std::wstring_view mod_path) noexcept {
+    if (!check_shiro_info(mod_path)) {
+        return true;
+    }
+
+    return false;
+}
+
+bool kh3d_cn_Apply(HMODULE module, std::wstring_view mod_path) noexcept {
+    if (!check_shiro_info(mod_path)) {
+        return true;
+    }
+
+    return false;
+}
+
+bool khlauncher_cn_Apply(HMODULE module, std::wstring_view mod_path) noexcept {
+    if (!check_shiro_info(mod_path)) {
+        return true;
+    }
+    SHIRO_DETECT_VERSION(khlauncher, version, module);
+
+    switch(version) {
+    case ExeVersion::Steam: return khlauncher_cn_steam_Apply(module);
+    case ExeVersion::EpicCrack: return khlauncher_cn_epic_crack_Apply(module);
+    default: return false;
+    }
+}
+
+bool khlauncher28_cn_Apply(HMODULE module, std::wstring_view mod_path) noexcept {
+    if (!check_shiro_info(mod_path)) {
+        return true;
+    }
+
+    return false;
+}
+
 }

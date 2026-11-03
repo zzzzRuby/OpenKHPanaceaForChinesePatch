@@ -139,8 +139,36 @@ static bool IsEpic() noexcept {
 #ifdef PANACEA_WITH_CN_INJECT
 namespace Shiro {
 bool kh1_cn_Apply(HMODULE module, std::wstring_view mod_path) noexcept;
-bool khlauncher_cn_Apply(HMODULE module, std::wstring_view mod_path) noexcept;
 bool khtheater_cn_Apply(HMODULE module, std::wstring_view mod_path) noexcept;
+bool khrecom_cn_Apply(HMODULE module, std::wstring_view mod_path) noexcept;
+bool kh2_cn_Apply(HMODULE module, std::wstring_view mod_path) noexcept;
+bool khbbs_cn_Apply(HMODULE module, std::wstring_view mod_path) noexcept;
+bool kh3d_cn_Apply(HMODULE module, std::wstring_view mod_path) noexcept;
+bool khlauncher_cn_Apply(HMODULE module, std::wstring_view mod_path) noexcept;
+bool khlauncher28_cn_Apply(HMODULE module, std::wstring_view mod_path) noexcept;
+
+bool zh_cn_inject(HMODULE module, std::wstring_view mod_path, OpenKH::GameId game_id) noexcept {
+    switch (game_id) {
+        case OpenKH::GameId::KingdomHearts1:
+            return Shiro::kh1_cn_Apply(module, mod_path);
+        case OpenKH::GameId::KingdomHearts2:
+            return Shiro::kh2_cn_Apply(module, mod_path);
+        case OpenKH::GameId::KingdomHeartsReCom:
+            return Shiro::khrecom_cn_Apply(module, mod_path);
+        case OpenKH::GameId::KingdomHeartsBbs:
+            return Shiro::khbbs_cn_Apply(module, mod_path);
+        case OpenKH::GameId::KingdomHeartsDdd:
+            return Shiro::kh3d_cn_Apply(module, mod_path);
+        case OpenKH::GameId::Theater:
+            return Shiro::khtheater_cn_Apply(module, mod_path);
+        case OpenKH::GameId::Launcher1_5_2_5:
+            return Shiro::khlauncher_cn_Apply(module, mod_path);
+        case OpenKH::GameId::Launcher2_8:
+            return Shiro::khlauncher28_cn_Apply(module, mod_path);
+        default:
+            return false;
+    }
+}
 }
 #endif
 
@@ -276,23 +304,8 @@ void OpenKH::Initialize()
         m_ExtractPath.append(gamefolders[(int)m_GameID]);
     
 #ifdef PANACEA_WITH_CN_INJECT
-    switch (m_GameID)
-    {
-    case GameId::KingdomHearts1:
-        if (!Shiro::kh1_cn_Apply(g_hInstance, m_ModPath)) {
-            printf("Inject kh1 cn code failed.\n");
-        }
-        break;
-    case GameId::Launcher1_5_2_5:
-        if (!Shiro::khlauncher_cn_Apply(g_hInstance, m_ModPath)) {
-            printf("Inject kh1 cn code failed.\n");
-        }
-        break;
-    case GameId::Theater:
-        if (!Shiro::khtheater_cn_Apply(g_hInstance, m_ModPath)) {
-            printf("Inject kh1 cn code failed.\n");
-        }
-        break;
+    if (!Shiro::zh_cn_inject(g_hInstance, m_ModPath, m_GameID)) {
+        fprintf(stderr, "Failed to apply zh_cn_inject for game %d\n", (int)m_GameID);
     }
 #endif
 
